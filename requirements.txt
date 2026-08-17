@@ -1,0 +1,4 @@
+# Portal do Aluno P.I.
+# Python 3.14.6
+
+Django==6.1
