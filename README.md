@@ -10,10 +10,10 @@ As versões foram selecionadas com base em distribuições estáveis e de suport
 
 | Categoria | Tecnologia | Versão |
 |---|---|---|
-| Linguagem de programação | Python | A definir |
-| Framework web | Django | A definir |
-| Banco de dados (Produção) | PostgreSQL | A definir |
-| Banco de dados (Desenvolvimento) | SQLite | A definir |
+| Linguagem de programação | Python | 3.14.6 |
+| Framework web | Django | 6.1 |
+| Banco de dados (Desenvolvimento) | SQLite | Padrão do Django |
+| Banco de dados (Produção) | PostgreSQL | 18.6 |
 
 ### Escolha do Banco de Dados (PostgreSQL)
 O **PostgreSQL** foi escolhido por ser um banco de dados relacional (RDBMS) de altíssimo desempenho, robusto e nativamente suportado pelo Django. Ele atende perfeitamente à necessidade de manter a integridade referencial entre alunos, matrículas, notas, parcelas, boletins e históricos acadêmicos, garantindo consultas isoladas por aluno, suporte nativo a campos JSON (ideal para preferências de acessibilidade e logs de consentimento da LGPD) e alto desempenho em transações.
