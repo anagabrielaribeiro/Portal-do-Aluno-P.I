@@ -41,7 +41,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    'autenticacao',
+    'alunos',
+    'matriculas',
+    'notas',
+    'financeiro',
+    'calendario_horarios',
+    'agenda',
+    'documentos_certificados',
+    'tarefas',
+    'privacidade_lgpd',
 ]
+
+AUTH_USER_MODEL = 'autenticacao.Usuario'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
