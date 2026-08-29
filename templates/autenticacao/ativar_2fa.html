@@ -1,0 +1,85 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ativar autenticação - Portal do Aluno</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <section class="login-card">
+
+            <h1>Configurar autenticação</h1>
+
+            <p>
+                Para aumentar a segurança da sua conta,
+                configure a autenticação em dois fatores.
+            </p>
+
+            <p>
+                Abra seu aplicativo autenticador e escaneie
+                o QR Code abaixo.
+            </p>
+
+            <div>
+                <img
+                    src="data:image/png;base64,{{ qr_base64 }}"
+                    alt="QR Code para configurar a autenticação em dois fatores"
+                >
+            </div>
+
+            <p>
+                Depois de escanear o código, digite abaixo
+                o código de 6 dígitos apresentado pelo aplicativo.
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="{{ message.tags }}">
+                        {{ message }}
+                    </p>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div>
+                    <label for="codigo">
+                        Código de autenticação
+                    </label>
+
+                    <input
+                        type="text"
+                        id="codigo"
+                        name="codigo"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                    >
+                </div>
+
+                <button type="submit">
+                    Confirmar
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

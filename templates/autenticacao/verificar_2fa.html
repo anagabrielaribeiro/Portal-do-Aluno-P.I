@@ -1,0 +1,51 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ativar autenticação - Portal do Aluno</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <section class="login-card">
+            <form method="post">
+
+                {% csrf_token %}
+                <div>
+                    <label for="codigo">
+                        Código de autenticação
+                    </label>
+
+                    <input
+                        type="text"
+                        id="codigo"
+                        name="codigo"
+                        maxlength="6"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                    >
+                </div>
+
+            <button type="submit">
+                Confirmar
+            </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
