@@ -1,5 +1,4 @@
-{% load static %} <!-- Permite carregar arquivos estáticos do Django -->
-
+{% load static %} 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -25,7 +24,9 @@
 
             <!-- Logo e nome do portal -->
             <div class="marca">
-                <div class="marca-icone"></div>
+                <div class="marca-icone">
+                    <img src="{% static 'images/logo.jpeg' %}" alt="Logo Portal do Aluno">
+                </div>
                 <span>Portal do Aluno P.I</span>
             </div>
 
@@ -51,7 +52,7 @@
 
             <!-- Mostra que a autenticação em dois fatores foi feita -->
             <div class="status-2fa">
-                🔐 Autenticação em dois fatores validada.
+                Autenticação em dois fatores validada.
             </div>
 
         </section>

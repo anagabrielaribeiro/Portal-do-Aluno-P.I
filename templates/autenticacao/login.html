@@ -1,5 +1,5 @@
 
-{% load static %} <!-- Permite carregar arquivos estáticos do Django -->
+{% load static %} 
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -26,7 +26,9 @@
 
             <!-- Logo e nome do portal -->
             <div class="marca">
-                <div class="marca-icone"></div>
+                <div class="marca-icone">
+                    <img src="{% static 'images/logo.jpeg' %}" alt="Logo Portal do Aluno">
+                </div>
                 <span>Portal do Aluno P.I</span>
             </div>
 
@@ -137,7 +139,7 @@
 
                 <!-- Explica como funciona a autenticação em dois fatores -->
                 <div class="aviso-autenticador">
-                    <strong>🔐 Autenticação em dois fatores (2FA)</strong>
+                    <strong>Autenticação em dois fatores (2FA)</strong>
                     <p>
                         Após validar as credenciais, um código de 6 dígitos é
                         solicitado no aplicativo autenticador. Tentativas

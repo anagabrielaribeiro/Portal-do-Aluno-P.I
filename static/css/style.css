@@ -19,7 +19,7 @@ body {
 
 .painel-esquerdo {
     flex: 1;
-    background: linear-gradient(160deg, #7C3AED, #A855F7, #C084FC);
+    background: #7C3AED;
     color: white;
     padding: 48px;
     display: flex;
@@ -35,18 +35,25 @@ body {
     top: 32px;
     left: 48px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 26px;
 }
 
 .marca-icone {
-    width: 40px;
-    height: 40px;
+    width: 86px;
+    height: 86px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    overflow: hidden;
+}
+
+.marca-icone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .painel-esquerdo h1 {
@@ -152,7 +159,7 @@ body {
     width: 100%;
     padding: 12px;
     cursor: pointer;
-    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    background: #7C3AED;
     color: white;
     font-weight: bold;
     border: none;
@@ -161,7 +168,7 @@ body {
 }
 
 .form-wrapper button:hover {
-    opacity: 0.9;
+    background: #6D28D9;
 }
 
 .aviso-autenticador {
