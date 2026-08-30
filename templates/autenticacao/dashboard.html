@@ -1,32 +1,60 @@
+{% load static %} <!-- Permite carregar arquivos estáticos do Django -->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
+
+    <!-- Faz a página se adaptar a diferentes tamanhos de tela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Dashboard - Portal do Aluno</title>
+
+    <!-- Carrega o arquivo de estilos da página -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
 
-    <main>
+    <!-- Área principal do dashboard -->
+    <main class="dashboard-container">
 
-        <h1>Portal do Aluno</h1>
+        <!-- Cabeçalho com a identificação do portal e botão de saída -->
+        <header class="dashboard-topo">
 
-        <h2>Bem-vindo!</h2>
+            <!-- Logo e nome do portal -->
+            <div class="marca">
+                <div class="marca-icone"></div>
+                <span>Portal do Aluno P.I</span>
+            </div>
 
-        <p>
-            Login realizado com sucesso.
-        </p>
+            <!-- Link para sair da conta e encerrar a sessão -->
+            <a href="{% url 'logout' %}" class="botao-sair">
+                Sair
+            </a>
 
-        <p>
-            Autenticação em dois fatores validada.
-        </p>
+        </header>
 
-        <a href="{% url 'logout' %}">
-            Sair
-        </a>
+        <!-- Conteúdo principal exibido após o login -->
+        <section class="dashboard-card">
+
+            <!-- Identifica a área acessada pelo usuário -->
+            <span class="eyebrow">Área do estudante</span>
+
+            <h1>Bem-vindo!</h1>
+
+            <!-- Mensagem confirmando que o login foi realizado -->
+            <p class="subtitulo">
+                Login realizado com sucesso.
+            </p>
+
+            <!-- Mostra que a autenticação em dois fatores foi feita -->
+            <div class="status-2fa">
+                🔐 Autenticação em dois fatores validada.
+            </div>
+
+        </section>
 
     </main>
 

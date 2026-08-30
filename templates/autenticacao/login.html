@@ -1,75 +1,160 @@
-{% load static %}
+
+{% load static %} <!-- Permite carregar arquivos estáticos do Django -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
+
+    <!-- Faz a página se adaptar a diferentes tamanhos de tela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Portal do Aluno</title>
 
+    <!-- Carrega o arquivo de estilos da página -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
 
-    <main class="login-container">
+    <!-- Área principal da tela de login -->
+    <main class="login-split">
 
-        <section class="login-card">
+        <!-- Parte esquerda com informações sobre o portal -->
+        <section class="painel-esquerdo">
 
-            <h1>Portal do Aluno</h1>
+            <!-- Logo e nome do portal -->
+            <div class="marca">
+                <div class="marca-icone"></div>
+                <span>Portal do Aluno P.I</span>
+            </div>
 
-            <p>Acesse sua conta acadêmica</p>
+            <!-- Título principal da página -->
+            <h1>
+                Toda a sua vida acadêmica em
+                um único ambiente.
+            </h1>
 
-            {% if erro %}
-                <p class="erro">
-                    {{ erro }}
-                </p>
-            {% endif %}
+            <!-- Descrição dos serviços disponíveis no portal -->
+            <p class="descricao">
+                Gestão acadêmica e autoatendimento do estudante:
+                acompanhe notas, frequência, situação financeira,
+                calendário, tarefas e documentos sem precisar de
+                atendimento presencial.
+            </p>
 
-            <form method="post">
+            <!-- Cards com algumas das principais funções do portal -->
+            <div class="cards-info">
 
-                {% csrf_token %}
-
-                <div>
-                    <label for="username">
-                        Usuário
-                    </label>
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                    >
+                <div class="card-info">
+                    <strong>Acadêmico</strong>
+                    <p>Matrículas, notas, faltas e boletim sempre atualizados.</p>
                 </div>
 
-                <div>
-                    <label for="password">
-                        Senha
-                    </label>
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                    >
+                <div class="card-info">
+                    <strong>Financeiro</strong>
+                    <p>Mensalidades, situação de pagamento e emissão de boletos.</p>
                 </div>
 
-                <button type="submit">
-                    Entrar
-                </button>
+                <div class="card-info">
+                    <strong>Documentos</strong>
+                    <p>Declaração de matrícula, certificados e arquivos da instituição.</p>
+                </div>
 
-            </form>
+            </div>
+
+        </section>
+
+        <!-- Parte direita com os campos de login -->
+        <section class="painel-direito">
+
+            <div class="form-wrapper">
+
+                <!-- Identifica a área de acesso do usuário -->
+                <span class="eyebrow">Acesso do estudante</span>
+
+                <h2>Entrar no portal</h2>
+
+                <p class="subtitulo">Use seu usuário e senha institucional.</p>
+
+                <!-- Exibe uma mensagem de erro quando o login não é válido -->
+                {% if erro %}
+                    <p class="erro">
+                        {{ erro }}
+                    </p>
+                {% endif %}
+
+                <!-- Exibe mensagens enviadas pelo Django -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <p class="{{ message.tags }}">
+                            {{ message }}
+                        </p>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Formulário usado para enviar os dados de login -->
+                <form method="post">
+
+                    
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="username">
+                            Usuário
+                        </label>
+
+                        <!-- Campo para informar o usuário -->
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="password">
+                            Senha
+                        </label>
+
+                        <!-- Campo para informar a senha -->
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                        >
+                    </div>
+
+                    <!-- Envia os dados -->
+                    <button type="submit">
+                        Entrar
+                    </button>
+
+                </form>
+
+                <!-- Explica como funciona a autenticação em dois fatores -->
+                <div class="aviso-autenticador">
+                    <strong>🔐 Autenticação em dois fatores (2FA)</strong>
+                    <p>
+                        Após validar as credenciais, um código de 6 dígitos é
+                        solicitado no aplicativo autenticador. Tentativas
+                        excessivas ativam o bloqueio temporário.
+                    </p>
+                </div>
+
+            </div>
 
         </section>
 
     </main>
 
+    <!-- Carrega o JavaScript da aplicação -->
     <script src="{% static 'js/main.js' %}"></script>
 
 </body>
 
 </html>
+```

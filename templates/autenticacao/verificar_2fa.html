@@ -1,46 +1,119 @@
-{% load static %}
+```html
+{% load static %} <!-- Permite carregar arquivos estáticos do Django -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
+
+    <!-- Faz a página se adaptar a diferentes tamanhos de tela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Ativar autenticação - Portal do Aluno</title>
+    <title>Verificar autenticação - Portal do Aluno</title>
 
+    <!-- Carrega o arquivo de estilos da página -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
 
-    <main class="login-container">
+    <!-- Área principal da tela de verificação -->
+    <main class="login-split">
 
-        <section class="login-card">
-            <form method="post">
+        <!-- Parte esquerda com informações sobre a autenticação -->
+        <section class="painel-esquerdo">
 
-                {% csrf_token %}
-                <div>
-                    <label for="codigo">
-                        Código de autenticação
-                    </label>
+            <!-- Logo e nome do portal -->
+            <div class="marca">
+                <div class="marca-icone"></div>
+                <span>Portal do Aluno P.I</span>
+            </div>
 
-                    <input
-                        type="text"
-                        id="codigo"
-                        name="codigo"
-                        maxlength="6"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        required
-                    >
+            <!-- Título principal da página -->
+            <h1>
+                Quase lá.
+            </h1>
+
+            <!-- Explica a etapa de verificação -->
+            <p class="descricao">
+                Confirme sua identidade com o código gerado
+                pelo aplicativo autenticador para acessar
+                sua conta com segurança.
+            </p>
+
+        </section>
+
+        <!-- Parte direita com o formulário de verificação -->
+        <section class="painel-direito">
+
+            <div class="form-wrapper">
+
+                <!-- Indica que o usuário está na etapa de verificação -->
+                <span class="eyebrow">Verificação em duas etapas</span>
+
+                <h2>Digite seu código</h2>
+
+                <!-- Orienta o usuário sobre o aplicativo de autentificação -->
+                <p class="subtitulo">
+                    Abra o aplicativo autenticador que você
+                    configurou no primeiro acesso e digite o
+                    código de 6 dígitos apresentado nele.
+                </p>
+
+                <!-- Mostra informações para quem não está com o aplicativo autenticador -->
+                <div class="instrucoes-2fa">
+                    <strong>Não tem mais o aplicativo?</strong>
+                    <p>
+                        Você precisa ter instalado no seu celular
+                        um aplicativo autenticador, como o Google
+                        Authenticator ou Microsoft Authenticator,
+                        configurado no seu primeiro acesso. Em
+                        iPhones, o app de Senhas do sistema também
+                        funciona.
+                    </p>
                 </div>
 
-            <button type="submit">
-                Confirmar
-            </button>
+                <!-- Exibe mensagens enviadas pelo Django -->
+                {% if messages %}
+                    {% with message=messages|last %}
+                        <p class="{{ message.tags }}">
+                            {{ message }}
+                        </p>
+                    {% endwith %}
+                {% endif %}
 
-            </form>
+                <!-- Campo para enviar o código de autenticação -->
+                <form method="post">
+
+                    
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="codigo">
+                            Código de autenticação
+                        </label>
+
+                        <!-- Campo para informar o código de 6 dígitos -->
+                        <input
+                            type="text"
+                            id="codigo"
+                            name="codigo"
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            required
+                        >
+                    </div>
+
+                    <!-- Envia o código para ser validado -->
+                    <button type="submit">
+                        Confirmar
+                    </button>
+
+                </form>
+
+            </div>
 
         </section>
 
@@ -49,3 +122,4 @@
 </body>
 
 </html>
+```

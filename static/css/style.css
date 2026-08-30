@@ -5,49 +5,320 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #f4f6f8;
 }
 
-.login-container {
+
+/* Login */
+
+.login-split {
     min-height: 100vh;
     display: flex;
+}
+
+/* Parte do painel da esquerda */
+
+.painel-esquerdo {
+    flex: 1;
+    background: linear-gradient(160deg, #7C3AED, #A855F7, #C084FC);
+    color: white;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
+}
+
+.marca {
+    display: flex;
     align-items: center;
+    gap: 12px;
+    position: absolute;
+    top: 32px;
+    left: 48px;
+    font-weight: bold;
+    font-size: 16px;
 }
 
-.login-card {
-    width: 100%;
-    max-width: 400px;
-    padding: 32px;
-    background: white;
+.marca-icone {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.painel-esquerdo h1 {
+    font-size: 32px;
+    line-height: 1.3;
+    margin: 0 0 16px;
+    max-width: 480px;
+}
+
+.descricao {
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 480px;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+.cards-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 480px;
+}
+
+.card-info {
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 16px 20px;
 }
 
-.login-card h1 {
+.card-info strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.card-info p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Parte do painel da direita */
+
+.painel-direito {
+    flex: 1;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 380px;
+}
+
+.eyebrow {
+    display: block;
+    color: #7C3AED;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin-bottom: 8px;
 }
 
-.login-card p {
+.form-wrapper h2 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    color: #111827;
+}
+
+.subtitulo {
+    color: #6B7280;
     margin-bottom: 24px;
 }
 
-.login-card div {
+.form-wrapper div {
     margin-bottom: 16px;
 }
 
-.login-card label {
+.form-wrapper label {
     display: block;
     margin-bottom: 6px;
+    font-size: 14px;
+    color: #374151;
 }
 
-.login-card input {
+.form-wrapper input {
     width: 100%;
-    padding: 10px;
+    padding: 11px 14px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
 }
 
-.login-card button {
+.form-wrapper input:focus {
+    border-color: #7C3AED;
+}
+
+.form-wrapper button {
     width: 100%;
     padding: 12px;
     cursor: pointer;
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    margin-top: 8px;
+}
+
+.form-wrapper button:hover {
+    opacity: 0.9;
+}
+
+.aviso-autenticador {
+    background: #F9FAFB;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #4B5563;
+}
+
+.aviso-autenticador strong {
+    display: block;
+    color: #1F2937;
+    margin-bottom: 4px;
+}
+
+.aviso-autenticador p {
+    margin: 0;
+}
+
+.erro {
+    background: #FEF2F2;
+    color: #DC2626;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.success {
+    background: #F0FDF4;
+    color: #16A34A;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+/* Autentificação 2fa verificar e ativar */
+
+.instrucao-simples {
+    color: #4B5563;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.instrucoes-2fa {
+    background: #F5F3FF;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.instrucoes-2fa strong {
+    display: block;
+    color: #4C1D95;
+    margin-bottom: 4px;
+}
+
+.instrucoes-2fa p {
+    margin: 0;
+    color: #5B21B6;
+}
+
+.qr-wrapper {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.qr-wrapper img {
+    max-width: 220px;
+    width: 100%;
+    height: auto;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+/* Dashboard */
+
+.dashboard-container {
+    min-height: 100vh;
+    background: #F9FAFB;
+}
+
+.dashboard-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: #7C3AED;
+    color: white;
+}
+
+.dashboard-topo .marca {
+    position: static;
+}
+
+.botao-sair {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.botao-sair:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.dashboard-card {
+    max-width: 480px;
+    margin: 80px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12);
+    text-align: center;
+}
+
+.dashboard-card h1 {
+    margin: 4px 0 8px;
+    color: #111827;
+}
+
+.dashboard-card .subtitulo {
+    color: #6B7280;
+    margin-bottom: 24px;
+}
+
+.status-2fa {
+    background: #F0FDF4;
+    color: #16A34A;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Parte responsiva */
+
+@media (max-width: 900px) {
+    .login-split {
+        flex-direction: column;
+    }
+
+    .marca {
+        position: static;
+        margin-bottom: 24px;
+    }
+
+    .painel-esquerdo,
+    .painel-direito {
+        padding: 32px 24px;
+    }
 }

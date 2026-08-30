@@ -1,80 +1,138 @@
-{% load static %}
+{% load static %} <!-- Permite usar arquivos estáticos do Django, como o CSS -->
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
+
+    <!-- Faz a página se adaptar corretamente a celulares e tablets -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Ativar autenticação - Portal do Aluno</title>
 
+    <!-- Carrega o arquivo CSS através do sistema de arquivos estáticos do Django -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
 
-    <main class="login-container">
+    <!-- Estrutura principal da tela, dividida em dois painéis -->
+    <main class="login-split">
 
-        <section class="login-card">
+        <!-- Painel esquerdo com informações sobre a segurança da conta -->
+        <section class="painel-esquerdo">
 
-            <h1>Configurar autenticação</h1>
-
-            <p>
-                Para aumentar a segurança da sua conta,
-                configure a autenticação em dois fatores.
-            </p>
-
-            <p>
-                Abra seu aplicativo autenticador e escaneie
-                o QR Code abaixo.
-            </p>
-
-            <div>
-                <img
-                    src="data:image/png;base64,{{ qr_base64 }}"
-                    alt="QR Code para configurar a autenticação em dois fatores"
-                >
+            <!-- Logo e nome do portal -->
+            <div class="marca">
+                <div class="marca-icone"></div>
+                <span>Portal do Aluno P.I</span>
             </div>
 
-            <p>
-                Depois de escanear o código, digite abaixo
-                o código de 6 dígitos apresentado pelo aplicativo.
+            <!-- Título principal da página -->
+            <h1>
+                Sua conta, protegida
+                em dois passos.
+            </h1>
+
+            <!-- Explicação sobre a importância da autenticação em dois fatores -->
+            <p class="descricao">
+                A autenticação em dois fatores impede que outras
+                pessoas acessem sua conta, mesmo que descubram
+                sua senha. Configure uma única vez e use sempre
+                que entrar no portal.
             </p>
 
-            {% if messages %}
-                {% for message in messages %}
-                    <p class="{{ message.tags }}">
-                        {{ message }}
+        </section>
+
+        <!-- Painel direito onde acontece a configuração do 2FA -->
+        <section class="painel-direito">
+
+            <div class="form-wrapper">
+
+                <!-- Indica que essa é a etapa do primeiro acesso -->
+                <span class="eyebrow">Primeiro acesso</span>
+
+                <h2>Configurar autenticação</h2>
+
+                <p class="subtitulo">
+                    Para aumentar a segurança da sua conta,
+                    configure a autenticação em dois fatores.
+                </p>
+
+                <!-- Orientações antes de começar a configuração -->
+                <div class="instrucoes-2fa">
+                    <strong>Antes de continuar</strong>
+                    <p>
+                        Baixe um aplicativo autenticador no seu
+                        celular, como o Google Authenticator ou
+                        Microsoft Authenticator. Em iPhones, o
+                        próprio aplicativo de Senhas do sistema
+                        também funciona, sem necessidade de baixar
+                        nada.
                     </p>
-                {% endfor %}
-            {% endif %}
+                </div>
 
-            <form method="post">
+                <!-- Explica o primeiro passo para configurar o autenticador -->
+                <p class="instrucao-simples">
+                    Abra seu aplicativo autenticador e escaneie
+                    o QR Code abaixo.
+                </p>
 
-                {% csrf_token %}
-
-                <div>
-                    <label for="codigo">
-                        Código de autenticação
-                    </label>
-
-                    <input
-                        type="text"
-                        id="codigo"
-                        name="codigo"
-                        maxlength="6"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        required
+                <!-- Exibe o QR Code gerado pelo sistema -->
+                <div class="qr-wrapper">
+                    <img
+                        src="data:image/png;base64,{{ qr_base64 }}"
+                        alt="QR Code para configurar a autenticação em dois fatores"
                     >
                 </div>
 
-                <button type="submit">
-                    Confirmar
-                </button>
+                <!-- Orienta o usuário a inserir o código gerado pelo aplicativo -->
+                <p class="instrucao-simples">
+                    Depois de escanear o código, digite abaixo
+                    o código de 6 dígitos apresentado pelo aplicativo.
+                </p>
 
-            </form>
+                <!-- Exibe mensagens enviadas como erros ou confirmações -->
+                {% if messages %}
+                    {% with message=messages|last %}
+                        <p class="{{ message.tags }}">
+                            {{ message }}
+                        </p>
+                    {% endwith %}
+                {% endif %}
+
+                <!-- Envia o código para o servidor -->
+                <form method="post">
+
+                    
+                    {% csrf_token %}
+
+                    <div>
+                        <label for="codigo">
+                            Código de autenticação
+                        </label>
+
+                        <!-- Campo onde o usuário informa o código de 6 dígitos -->
+                        <input
+                            type="text"
+                            id="codigo"
+                            name="codigo"
+                            maxlength="6"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            required
+                        >
+                    </div>
+
+                    <!-- Envia o código para ser validado -->
+                    <button type="submit">
+                        Confirmar
+                    </button>
+
+                </form>
+
+            </div>
 
         </section>
 
