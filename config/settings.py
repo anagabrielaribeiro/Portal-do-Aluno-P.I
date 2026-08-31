@@ -147,13 +147,16 @@ MAILERS = {
     },
 }
 
+
+# Deixamos o PBKDF2 explícito aqui por ser a recomendação da OWASP contra ataques de força bruta.
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
-    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",     # É o principal, que o Django vai usar pra encriptar (fazer o hash) das senhas novas.
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",     # Os próximos ficam apenas de "reserva" caso o sistema precise ler alguma senha antiga que tenha sido salva com outro padrão antes.
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
 ]
 
-SESSION_COOKIE_AGE = 1800
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Reduzimos a sessão para 30 minutos (renovando a cada ação) para garantir a segurança dos dados acadêmicos.
+SESSION_COOKIE_AGE = 1800     # Em 30 minutos, possui 1800 segundos.
+SESSION_SAVE_EVERY_REQUEST = True     # A cada requisição do usuário o tempo volta a contar do zero.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True     # Expira na hora se o usuário fechar o navegador (aba/janela).
