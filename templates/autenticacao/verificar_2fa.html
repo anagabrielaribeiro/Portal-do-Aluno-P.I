@@ -78,11 +78,11 @@
 
                 <!-- Exibe mensagens enviadas pelo Django -->
                 {% if messages %}
-                    {% with message=messages|last %}
+                    {% for message in messages %}
                         <p class="{{ message.tags }}">
                             {{ message }}
                         </p>
-                    {% endwith %}
+                    {% endfor %}
                 {% endif %}
 
                 <!-- Campo para enviar o código de autenticação -->
