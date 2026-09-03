@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'documentos_certificados',
     'tarefas',
     'privacidade_lgpd',
+    'recuperacao_senha',
 ]
 
 AUTH_USER_MODEL = 'autenticacao.Usuario'
@@ -141,11 +142,12 @@ STATICFILES_DIRS = [
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    },
-}
+
+# MAILERS = {
+#   "default": {
+#      "BACKEND": "django.core.mail.backends.console.EmailBackend",
+# },
+#}
 
 
 # Deixamos o PBKDF2 explícito aqui por ser a recomendação da OWASP contra ataques de força bruta.
@@ -160,3 +162,13 @@ PASSWORD_HASHERS = [
 SESSION_COOKIE_AGE = 1800     # Em 30 minutos, possui 1800 segundos.
 SESSION_SAVE_EVERY_REQUEST = True     # A cada requisição do usuário o tempo volta a contar do zero.
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True     # Expira na hora se o usuário fechar o navegador (aba/janela).
+
+
+# Mostra o conteúdo do e-mail no terminal durante o desenvolvimento,
+# sem precisar configurar um servidor SMTP real ainda.
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'portal@localhost.com'
+
+# Tempo, em segundos, que o link de recuperação continua válido.
+# 3600 segundos = 1 hora.
+PASSWORD_RESET_TIMEOUT = 3600
