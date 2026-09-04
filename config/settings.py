@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 from pathlib import Path
 import os
 
+from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv() # Puxa as variáveis do arquivo .env para a memória
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -164,11 +170,43 @@ SESSION_SAVE_EVERY_REQUEST = True     # A cada requisição do usuário o tempo 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True     # Expira na hora se o usuário fechar o navegador (aba/janela).
 
 
-# Mostra o conteúdo do e-mail no terminal durante o desenvolvimento,
-# sem precisar configurar um servidor SMTP real ainda.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'portal@localhost.com'
 
-# Tempo, em segundos, que o link de recuperação continua válido.
-# 3600 segundos = 1 hora.
-PASSWORD_RESET_TIMEOUT = 3600
+# Configurações de envio de e-mail via SMTP do Google
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Suas credenciais do portal
+EMAIL_HOST_USER = 'portalalunopi@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
+
+
+
+# Configuração de Logs de Auditoria
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'auditoria_format': {
+            'format': '{levelname} | {asctime} | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'arquivo': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'auditoria.log',
+            'formatter': 'auditoria_format',
+        },
+    },
+    'loggers': {
+        'recuperacao_senha': {
+            'handlers': ['arquivo'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
