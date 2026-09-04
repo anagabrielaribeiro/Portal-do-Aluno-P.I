@@ -210,3 +210,7 @@ LOGGING = {
         },
     },
 }
+
+# Tempo, em segundos, que o link de recuperação continua válido.
+# 3600 segundos = 1 hora.
+PASSWORD_RESET_TIMEOUT = 3600
