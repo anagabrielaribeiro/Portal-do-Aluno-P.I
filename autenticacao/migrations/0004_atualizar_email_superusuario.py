@@ -1,8 +1,8 @@
 from django.db import migrations
 
-# essa função atualiza o email do superusuario de teste que ja existe,
-# trocando o dominio ficticio por um gmail real criado so pra receber
-# os e-mails de recuperacao de senha durante os testes/demonstracao
+# atualiza o email do superusuario de teste que ja existe,
+# trocando para o gmail real criado so pra receber
+# os e-mails de recuperacao de senha durante os testes
 def atualizar_email_superusuario(apps, schema_editor):
     Usuario = apps.get_model('autenticacao', 'Usuario')
     Usuario.objects.filter(username='Professor.Teste').update(
