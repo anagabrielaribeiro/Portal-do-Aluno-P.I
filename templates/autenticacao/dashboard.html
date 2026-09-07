@@ -1,64 +1,206 @@
-{% load static %} 
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-
     <!-- Faz a página se adaptar a diferentes tamanhos de tela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Dashboard - Portal do Aluno</title>
-
     <!-- Carrega o arquivo de estilos da página -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-
 <body>
+    
+    <div class="app-layout">
 
-    <!-- Área principal do dashboard -->
-    <main class="dashboard-container">
-
-        <!-- Cabeçalho com a identificação do portal e botão de saída -->
-        <header class="dashboard-topo">
-
-            <!-- Logo e nome do portal -->
-            <div class="marca">
+        <!-- Menu lateral com os módulos do sistema -->
+        <aside class="sidebar">
+            <!-- Logo e nome do portal, fica fixo no topo da sidebar -->
+            <div class="sidebar-marca">
                 <div class="marca-icone">
                     <img src="{% static 'images/logo.jpeg' %}" alt="Logo Portal do Aluno">
                 </div>
-                <span>Portal do Aluno P.I</span>
+                <div class="marca-texto">
+                    <span class="marca-titulo">Portal do Aluno</span>
+                    <span class="marca-subtitulo">P.I — Gestão Acadêmica</span>
+                </div>
             </div>
 
-            <!-- Link para sair da conta e encerrar a sessão -->
-            <a href="{% url 'logout' %}" class="botao-sair">
+            <!-- Lista com os módulos/apps do sistema -->
+            <nav class="sidebar-nav">
+                <ul>
+                    <!-- Início é a página atual, por isso tem a classe "ativo" -->
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="ativo">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M3 11.5 12 4l9 7.5"/>
+                                    <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+                                </svg>
+                            </span>
+                            Início
+                        </a>
+                    </li>
+                    <!-- Módulo de matrículas -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M4 4h16v16H4z"/>
+                                    <path d="M8 2v4M16 2v4M4 10h16"/>
+                                </svg>
+                            </span>
+                            Minhas Matrículas
+                        </a>
+                    </li>
+                    <!-- Módulo de notas e faltas -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M6 3h9l5 5v13H6z"/>
+                                    <path d="M15 3v5h5M9 13h6M9 17h6"/>
+                                </svg>
+                            </span>
+                            Notas e Faltas
+                        </a>
+                    </li>
+                    <!-- Módulo financeiro -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="6" width="18" height="12" rx="2"/>
+                                    <path d="M3 10h18M7 15h4"/>
+                                </svg>
+                            </span>
+                            Financeiro
+                        </a>
+                    </li>
+                    <!-- Módulo de calendário -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="3" y="4" width="18" height="17" rx="2"/>
+                                    <path d="M3 9h18M8 2v4M16 2v4"/>
+                                </svg>
+                            </span>
+                            Calendário
+                        </a>
+                    </li>
+                    <!-- Módulo de agenda -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M4 6h16M4 12h16M4 18h10"/>
+                                </svg>
+                            </span>
+                            Agenda
+                        </a>
+                    </li>
+                    <!-- Módulo de horário de aulas -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <path d="M12 7v5l3 2"/>
+                                </svg>
+                            </span>
+                            Horário de Aulas
+                        </a>
+                    </li>
+                    <!-- Módulo de tarefas -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <rect x="5" y="4" width="14" height="17" rx="2"/>
+                                    <path d="M9 3h6v3H9zM8 11h8M8 15h5"/>
+                                </svg>
+                            </span>
+                            Tarefas
+                        </a>
+                    </li>
+                    <!-- Módulo de certificados -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <circle cx="12" cy="9" r="5"/>
+                                    <path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/>
+                                </svg>
+                            </span>
+                            Certificados
+                        </a>
+                    </li>
+                    <!-- Módulo de documentos -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M6 2h9l5 5v15H6z"/>
+                                    <path d="M15 2v5h5M9 12h6M9 16h6"/>
+                                </svg>
+                            </span>
+                            Documentos
+                        </a>
+                    </li>
+                    <!-- Módulo de dados pessoais do aluno -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+                                </svg>
+                            </span>
+                            Dados Pessoais
+                        </a>
+                    </li>
+                    <!-- Módulo de privacidade e LGPD -->
+                    <li>
+                        <a href="#">
+                            <span class="icone">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 2 4 5v6c0 5 3.4 8.7 8 11 4.6-2.3 8-6 8-11V5z"/>
+                                </svg>
+                            </span>
+                            Privacidade &amp; LGPD
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Botão de sair-->
+            <a href="{% url 'logout' %}" class="sidebar-sair">
                 Sair
             </a>
+        </aside>
 
-        </header>
+        <!-- Área de conteúdo principal -->
+        <main class="conteudo">
+            
+            <header class="conteudo-topo">
+                <div>
+                    <h2>Início</h2>
+                    <p>Curso · RGM · 2026</p>
+                </div>
+                
+                <div class="conteudo-topo-acoes">
+                    <span class="avatar">A</span>
+                </div>
+            </header>
 
-        <!-- Conteúdo principal exibido após o login -->
-        <section class="dashboard-card">
+            <!-- Boas-vindas e título do painel -->
+            <section class="conteudo-corpo">
+                <span class="eyebrow">Bem-vinda, Aluno</span>
+                <h1>Painel do estudante</h1>
+            </section>
+        </main>
 
-            <!-- Identifica a área acessada pelo usuário -->
-            <span class="eyebrow">Área do estudante</span>
-
-            <h1>Bem-vindo!</h1>
-
-            <!-- Mensagem confirmando que o login foi realizado -->
-            <p class="subtitulo">
-                Login realizado com sucesso.
-            </p>
-
-            <!-- Mostra que a autenticação em dois fatores foi feita -->
-            <div class="status-2fa">
-                Autenticação em dois fatores validada.
-            </div>
-
-        </section>
-
-    </main>
-
+    </div>
 </body>
-
 </html>
