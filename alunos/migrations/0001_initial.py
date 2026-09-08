@@ -7,13 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
+    # primeira migration
     initial = True
 
+    # depende do model de usuário estar pronto antes
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
+    # lista de operaçõoes 
     operations = [
+        #cria a tabela aluno com os campos da model 
         migrations.CreateModel(
             name='Aluno',
             fields=[

@@ -1,0 +1,64 @@
+/* cabeçalho da página de dados pessoais */
+.cadastro-header {
+    margin-bottom: 24px;
+}
+
+.cadastro-label {
+    color: #7C3AED;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.cadastro-header h1 {
+    margin: 4px 0 8px;
+    font-size: 28px;
+}
+
+.cadastro-descricao {
+    color: #6b7280;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+}
+
+/* grade dos três cards (identificação, contato, vínculo) */
+.cadastro-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.cadastro-cards .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.cadastro-cards h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.cadastro-cards label {
+    display: block;
+    font-size: 11px;
+    color: #7C3AED;
+    letter-spacing: 0.03em;
+    margin-top: 12px;
+}
+
+.cadastro-cards p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #111827;
+}
+
+/* empilha os cards em telas menores */
+@media (max-width: 900px) {
+    .cadastro-cards {
+        grid-template-columns: 1fr;
+    }
+}

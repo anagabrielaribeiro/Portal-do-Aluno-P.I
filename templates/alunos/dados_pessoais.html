@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dados Pessoais - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{# cabeçalho da página, mostra o contexto (categoria + título) e o aviso de que é só leitura #}
+<div class="cadastro-header">
+    <span class="cadastro-label">CADASTRO</span>
+    <h1>Dados pessoais</h1>
+    <p class="cadastro-descricao">
+        Alterações de dados cadastrais são realizadas pela secretaria acadêmica mediante solicitação registrada.
+    </p>
+</div>
+
+{# três cards lado a lado: identificação, contato e vínculo acadêmico #}
+<div class="cadastro-cards">
+
+    {# dados que vêm direto do model Aluno #}
+    <div class="card">
+        <h3>Identificação</h3>
+
+        <label>NOME COMPLETO</label>
+        <p>{{ aluno.nome }}</p>
+
+        <label>RGM</label>
+        <p>{{ aluno.ra }}</p>
+
+        {# usa a property cpf_mascarado do model, nunca o CPF puro #}
+        <label>CPF</label>
+        <p>{{ aluno.cpf_mascarado }}</p>
+
+        <label>RG</label>
+        <p>{{ aluno.rg }}</p>
+
+        <label>DATA DE NASCIMENTO</label>
+        <p>{{ aluno.data_nascimento|date:"d/m/Y" }}</p>
+    </div>
+
+    {# e-mail vem do Usuario (autenticação), não do Aluno #}
+    <div class="card">
+        <h3>Contato</h3>
+
+        <label>E-MAIL INSTITUCIONAL</label>
+        <p>{{ request.user.email }}</p>
+
+        <label>TELEFONE</label>
+        <p>{{ aluno.telefone }}</p>
+
+        <label>ENDEREÇO</label>
+        <p>{{ aluno.endereco }}</p>
+    </div>
+
+    {# esses dados vêm da matrícula ativa, buscada na view #}
+    <div class="card">
+        <h3>Vínculo acadêmico</h3>
+
+        {% if matricula_atual %}
+        <label>CURSO</label>
+        <p>{{ matricula_atual.curso.nome }}</p>
+
+        <label>TURMA</label>
+        <p>{{ matricula_atual.turma }}</p>
+
+        <label>PERÍODO</label>
+        <p>{{ matricula_atual.periodo_letivo }}</p>
+
+        <label>SITUAÇÃO</label>
+        <p>{{ matricula_atual.get_status_display }}</p>
+        {% else %}
+        {# cobre o caso de um aluno sem nenhuma matrícula ativa no momento #}
+        <p>Nenhuma matrícula ativa encontrada.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}

@@ -7,7 +7,7 @@ class Aluno(models.Model):
     e a relação é OneToOne porque um usuário só pode ter um perfil,
     e um pefil só pode ter um usuário
     """
-
+    # 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
         on_delete = models.CASCADE, # Cascade serve para se caso apagar o usuário, apaga o aluno tambem.
@@ -25,3 +25,18 @@ class Aluno(models.Model):
 
     def __str__(self):
         return self.nome
+
+    @property # só para acessar o método como uma propriedade sem o ()
+    # cria a função que mascara o cpf para o visual
+    def cpf_mascarado(self):
+        numeros = self.cpf.replace('.', '').replace('-', '') # remove o ponto e hífen do cpf
+        if len(numeros) != 11:
+            return self.cpf
+        return f"***.{numeros[3:6]}.{numeros[6:9]}-**"  # esconde os 3 primeiros numeros e os 2 ultimos
+
+
+    # cria um função para buscar a situação atual do aluno
+    @property
+    def situacao_atual(self):
+        ultima = self.matriculas.order_by('-data_matricula').first() # busca as matriculas ordenadas, e pega a primeira
+        return ultima.status if ultima else None # retorna o stats da ultima matricula

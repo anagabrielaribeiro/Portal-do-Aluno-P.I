@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('autenticacao.urls')),
     path('', include('recuperacao_senha.urls')),
+    path('alunos/', include('alunos.urls')),
+    path('matriculas/', include('matriculas.urls')),
 ]

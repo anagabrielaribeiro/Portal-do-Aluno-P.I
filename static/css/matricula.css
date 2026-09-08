@@ -1,0 +1,134 @@
+/* cabeçalho da página de matrículas */
+.matriculas-header {
+    margin-bottom: 24px;
+}
+
+.matriculas-label {
+    color: #7C3AED;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.matriculas-header h1 {
+    margin: 4px 0 8px;
+    font-size: 28px;
+}
+
+.matriculas-descricao {
+    color: #6b7280;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+}
+
+/* card roxo em destaque com a matrícula ativa */
+.matricula-destaque {
+    background: linear-gradient(135deg, #7C3AED, #A855F7);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 24px;
+    margin-top: 20px;
+}
+
+.matricula-destaque-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.matricula-destaque-titulo {
+    display: block;
+    font-weight: 600;
+}
+
+.matricula-destaque-codigo {
+    display: block;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+/* grade com os dados da matrícula, dentro do card roxo */
+.matricula-destaque-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.matricula-destaque-info label {
+    display: block;
+    font-size: 11px;
+    opacity: 0.8;
+    letter-spacing: 0.03em;
+}
+
+.matricula-destaque-info p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* tabela de histórico */
+.historico-matriculas {
+    margin-top: 32px;
+}
+
+.historico-matriculas table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.historico-matriculas th {
+    text-align: left;
+    font-size: 11px;
+    color: #6b7280;
+    letter-spacing: 0.03em;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.historico-matriculas td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* badges de status, cor muda conforme a situação da matrícula */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-ativa {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-trancada {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-concluida {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.badge-cancelada {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* empilha as colunas em telas menores */
+@media (max-width: 900px) {
+    .matricula-destaque-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
