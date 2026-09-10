@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dados Pessoais - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/aluno.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{# cabeçalho da página, mostra o contexto (categoria + título) e o aviso de que é só leitura #}
+<div class="cadastro-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <h1>Dados pessoais</h1>
+    <p class="cadastro-descricao">
+        Alterações de dados cadastrais são realizadas pela secretaria acadêmica mediante solicitação registrada.
+    </p>
+</div>
+
+{# três cards #}
+<div class="cadastro-cards">
+
+    {# dados que vêm direto do model Aluno #}
+    <div class="card">
+        <h3>Identificação</h3>
+
+        <label>NOME</label>
+        <p>{{ aluno.nome_exibicao }}</p>
+
+        <label>RGM</label>
+        <p>{{ aluno.ra }}</p>
+
+        {# usa a property cpf_mascarado do model, nunca o CPF puro #}
+        <label>CPF</label>
+        <p>{{ aluno.cpf_mascarado }}</p>
+
+        <label>RG</label>
+        <p>{{ aluno.rg_mascarado }}</p>
+
+        <label>DATA DE NASCIMENTO</label>
+        <p>{{ aluno.data_nascimento|date:"d/m/Y" }}</p>
+        
+        <label>SEXO</label>
+        <p>{{ aluno.get_sexo_display }}</p>
+    
+    </div>
+
+    {# e-mail vem do Usuario (autenticação), não do Aluno #}
+        <div class="card">
+        <h3>Contato</h3>
+
+        <label>E-MAIL INSTITUCIONAL</label>
+        <p>{{ request.user.email }}</p>
+
+        {% if aluno.pode_editar_contato %}
+        <form method="post" id="form-contato">
+            {% csrf_token %}
+
+            <div class="campo-editavel">
+                <label>TELEFONE</label>
+                <div class="campo-linha">
+                    <p class="texto-campo" data-texto="telefone">{{ aluno.telefone }}</p>
+                    {{ form.telefone }}
+                    <button type="button" class="btn-editar" data-campo="telefone" aria-label="Editar telefone">✎</button>
+                </div>
+            </div>
+
+            <div class="campo-editavel">
+                <label>ENDEREÇO</label>
+                <div class="campo-linha">
+                    <p class="texto-campo" data-texto="endereco">{{ aluno.endereco }}</p>
+                    {{ form.endereco }}
+                    <button type="button" class="btn-editar" data-campo="endereco" aria-label="Editar endereço">✎</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-salvar" id="btn-salvar" hidden>Salvar</button>
+        </form>
+        {% else %}
+        <label>TELEFONE</label>
+        <p>{{ aluno.telefone }}</p>
+
+        <label>ENDEREÇO</label>
+        <p>{{ aluno.endereco }}</p>
+
+        <p class="aviso-cooldown">
+            Você poderá editar novamente em {{ aluno.proxima_edicao_disponivel|date:"d/m/Y às H:i" }}.
+        </p>
+        {% endif %}
+    </div>
+
+    {# esses dados vêm da matrícula ativa, buscada na view #}
+    <div class="card">
+        <h3>Vínculo acadêmico</h3>
+
+        {% if matricula_atual %}
+        <label>CURSO</label>
+        <p>{{ matricula_atual.curso.nome }}</p>
+
+        <label>TURMA</label>
+        <p>{{ matricula_atual.turma }}</p>
+
+        <label>PERÍODO</label>
+        <p>{{ matricula_atual.periodo_letivo }}</p>
+
+        <label>SITUAÇÃO</label>
+        <p>{{ matricula_atual.get_status_display }}</p>
+        {% else %}
+        {# caso de um aluno sem nenhuma matrícula ativa no momento #}
+        <p>Nenhuma matrícula ativa encontrada.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    document.querySelectorAll('.btn-editar').forEach(function (botao) {
+        botao.addEventListener('click', function () {
+            const linha = botao.closest('.campo-linha');
+            const texto = linha.querySelector('.texto-campo');
+            const input = linha.querySelector('input');
+            const botaoSalvar = document.getElementById('btn-salvar');
+
+            if (!texto || !input) {
+                console.error('Não encontrei os elementos dentro de .campo-linha');
+                return;
+            }
+
+            texto.style.display = 'none';
+            input.style.display = 'inline-block';
+            input.style.width = '100%';
+            input.focus();
+
+            botao.style.display = 'none';
+            if (botaoSalvar) {
+                botaoSalvar.hidden = false;
+            }
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minhas Matrículas - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="matriculas-header">
+    <span class="matriculas-label">VIDA ACADÊMICA</span>
+    <h1>Minhas matrículas</h1>
+    <p class="matriculas-descricao">
+        Somente matrículas vinculadas ao seu cadastro são exibidas. O histórico é preservado mesmo após alteração de situação.
+    </p>
+</div>
+
+{# card roxo em destaque com a matrícula ativa do momento #}
+{% if matricula_atual %}
+<div class="matricula-destaque">
+
+    <div class="matricula-destaque-header">
+        <div>
+            <span class="matricula-destaque-titulo">Matrícula atual</span>
+            {# codigo é uma property calculada no model, não fica salva no banco #}
+            <span class="matricula-destaque-codigo">{{ matricula_atual.codigo }}</span>
+        </div>
+        {# a classe do badge muda de acordo com o status, pra cor bater no CSS #}
+        <span class="badge badge-{{ matricula_atual.status }}">{{ matricula_atual.get_status_display }}</span>
+    </div>
+
+    <div class="matricula-destaque-info">
+        <div>
+            <label>CURSO</label>
+            <p>{{ matricula_atual.curso.nome }}</p>
+        </div>
+        <div>
+            <label>TURMA</label>
+            <p>{{ matricula_atual.turma }}</p>
+        </div>
+        <div>
+            <label>PERÍODO ACADÊMICO</label>
+            <p>{{ matricula_atual.periodo_letivo }}</p>
+        </div>
+        <div>
+            {# início do vínculo não é a data dessa matrícula, é a mais antiga do aluno #}
+            <label>INÍCIO DO VÍNCULO</label>
+            <p>{{ inicio_vinculo|date:"d/m/Y" }}</p>
+        </div>
+        <div>
+            <label>ALUNO</label>
+            <p>{{ matricula_atual.aluno.nome }}</p>
+        </div>
+        <div>
+            <label>RGM</label>
+            <p>{{ matricula_atual.aluno.ra }}</p>
+        </div>
+        <div>
+            <label>REGIME</label>
+            <p>{{ matricula_atual.curso.get_regime_display }} · {{ matricula_atual.curso.get_modalidade_display }}</p>
+        </div>
+        <div>
+            <label>COORDENAÇÃO</label>
+            <p>{{ matricula_atual.curso.coordenador }}</p>
+        </div>
+    </div>
+
+</div>
+{% else %}
+<p>Nenhuma matrícula ativa encontrada.</p>
+{% endif %}
+
+{# tabela com todas as outras matrículas do aluno, mais antigas ou encerradas #}
+{% if historico %}
+<div class="historico-matriculas">
+    <h3>Histórico de matrículas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>CÓDIGO</th>
+                <th>CURSO</th>
+                <th>TURMA</th>
+                <th>PERÍODO</th>
+                <th>SITUAÇÃO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for matricula in historico %}
+            <tr>
+                <td>{{ matricula.codigo }}</td>
+                <td>{{ matricula.curso.nome }}</td>
+                <td>{{ matricula.turma }}</td>
+                <td>{{ matricula.periodo_letivo }}</td>
+                <td><span class="badge badge-{{ matricula.status }}">{{ matricula.get_status_display }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

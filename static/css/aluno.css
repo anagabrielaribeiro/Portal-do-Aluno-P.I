@@ -1,0 +1,124 @@
+/* cabeçalho da página de dados pessoais */
+.cadastro-header {
+    margin-bottom: 24px;
+}
+
+.cadastro-label {
+    color: #7C3AED;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.cadastro-header h1 {
+    margin: 4px 0 8px;
+    font-size: 28px;
+}
+
+.cadastro-descricao {
+    color: #6b7280;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 20px;
+}
+
+/* grade dos três cards (identificação, contato, vínculo) */
+.cadastro-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.cadastro-cards .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 320px;
+}
+
+.cadastro-cards h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.cadastro-cards label {
+    display: block;
+    font-size: 11px;
+    color: #7C3AED;
+    letter-spacing: 0.03em;
+    margin-top: 12px;
+}
+
+.cadastro-cards p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #111827;
+}
+
+.aviso-cooldown {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/*adicionado*/
+.campo-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.campo-linha .texto-campo {
+    margin: 0;
+    flex: 1;
+}
+
+.campo-editavel input {
+    display: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #ffffff;
+}
+
+.btn-editar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #7C3AED;
+    padding: 4px 8px;
+    line-height: 1;
+}
+
+.btn-editar:hover {
+    color: #5b21b6;
+}
+
+.btn-salvar {
+    margin-top: 16px;
+    background: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-salvar:hover {
+    background: #5b21b6;
+}
+
+
+/* empilha os cards em telas menores */
+@media (max-width: 900px) {
+    .cadastro-cards {
+        grid-template-columns: 1fr;
+    }
+}
