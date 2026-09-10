@@ -24,4 +24,5 @@ urlpatterns = [
     path('', include('recuperacao_senha.urls')),
     path('alunos/', include('alunos.urls')),
     path('matriculas/', include('matriculas.urls')),
+    path('privacidade/', include('privacidade_lgpd.urls')),
 ]

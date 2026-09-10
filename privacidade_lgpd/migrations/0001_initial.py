@@ -3,7 +3,7 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-
+ # precisa que essa migration de alunos já tenha rodado antes
 class Migration(migrations.Migration):
 
     initial = True
@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('alunos', '0004_aluno_dados_anonimizados'),
     ]
-
+    # cria a tabela Consentimento no banco
     operations = [
         migrations.CreateModel(
             name='Consentimento',
@@ -22,6 +22,8 @@ class Migration(migrations.Migration):
                 ('versao_termo', models.CharField(default='1.0', max_length=10)),
                 ('data_registro', models.DateTimeField(auto_now_add=True)),
                 ('data_revogacao', models.DateTimeField(blank=True, null=True)),
+                 # liga cada consentimento a um aluno
+                # PROTECT = se tentar apagar um aluno que tem consentimento, é recusado
                 ('aluno', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='consentimentos', to='alunos.aluno')),
             ],
         ),
