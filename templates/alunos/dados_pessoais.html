@@ -11,7 +11,7 @@
 
 {# cabeçalho da página, mostra o contexto (categoria + título) e o aviso de que é só leitura #}
 <div class="cadastro-header">
-    <span class="cadastro-label">CADASTRO</span>
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
     <h1>Dados pessoais</h1>
     <p class="cadastro-descricao">
         Alterações de dados cadastrais são realizadas pela secretaria acadêmica mediante solicitação registrada.
