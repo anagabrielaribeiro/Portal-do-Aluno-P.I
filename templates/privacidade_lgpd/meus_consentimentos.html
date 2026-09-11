@@ -1,55 +1,80 @@
 {% extends 'base.html' %}
-{# extends puxa o layout base do projeto menu, estilo geral#}
-
-{% block content %}
-{% load static %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/privacidade.css' %}">
 {% endblock %}
-{# tudo daqui pra baixo entra dentro do bloco "content" do base.html #}
-<a href="{% url 'dashboard' %}" class="link-voltar" aria-label="Voltar ao dashboard">&larr;</a>
 
-<h2>Meus consentimentos</h2>
+{% block content %}
+{% load static %}
 
-{# tabela simples com um consentimento por linha #}
-<table>
-  <tr>
-    {# cabeçalho da tabela, uma coluna pra cada informação #}
-    <th>Finalidade</th>
-    <th>Aceito em</th>
-    <th>Versão</th>
-    <th>Status</th>
-    <th></th>
-  </tr>
+<!-- Aqui é onde a mágica do layout vai acontecer -->
+<div class="conteudo-padrao-dashboard"> 
+    
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar</a>
 
-  {# for percorre a lista de consentimentos que a view mandou; c é cada um, um de cada vez #}
-  {% for c in consentimentos %}
-  <tr>
-    <td>{{ c.finalidade }}</td>
+    <div class="header-privacidade">
+        <h2>Privacidade e LGPD</h2>
+        <a href="{% url 'exportar_dados_json' %}" class="btn-exportar">
+            ↓ Exportar Meus Dados (JSON)
+        </a>
+    </div>
 
-    {# data_registro é um DateTimeField; o filtro |date:"d/m/Y" formata como 09/09/2026 #}
-    <td>{{ c.data_registro|date:"d/m/Y" }}</td>
+    <p class="texto-descritivo">
+        Aqui você gerencia suas preferências de privacidade. Faça o download de todas as informações que a instituição possui sobre você em formato estruturado ou revogue permissões concedidas anteriormente.
+    </p>
 
-    <td>{{ c.versao_termo }}</td>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alerta-sucesso">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
 
-    <td>
-      {# mostra "Ativo" ou a data de revogação, dependendo do estado #}
-      {# data_revogacao começa vazio (None) e só é preenchido quando o método revogar() roda #}
-      {% if c.data_revogacao %}Revogado em {{ c.data_revogacao|date:"d/m/Y" }}{% else %}Ativo{% endif %}
-    </td>
+    <h2>Meus consentimentos</h2>
 
-    <td>
-      {# botão de revogar só aparece se ainda não foi revogado #}
-      {% if not c.data_revogacao %}
-      <form method="post" action="{% url 'revogar_consentimento' c.id %}">
-        {% csrf_token %}
-        {# csrf_token é obrigatório em todo form POST do Django, protege contra ataque CSRF #}
-        <button type="submit">Revogar</button>
-      </form>
-      {% endif %}
-    </td>
-  </tr>
-  {% endfor %}
-</table>
+    <table class="tabela-consentimentos">
+      <tr>
+        <th>Finalidade</th>
+        <th>Aceito em</th>
+        <th>Versão</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+      {% for c in consentimentos %}
+      <tr>
+        <td>{{ c.finalidade }}</td>
+        <td>{{ c.data_registro|date:"d/m/Y" }}</td>
+        <td>{{ c.versao_termo }}</td>
+        <td>
+          {% if c.data_revogacao %}
+            <span class="status-revogado">Revogado em {{ c.data_revogacao|date:"d/m/Y" }}</span>
+          {% else %}
+            <span class="status-ativo">Ativo</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if not c.data_revogacao %}
+          <form method="post" action="{% url 'revogar_consentimento' c.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-revogar">Revogar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="zona-risco">
+        <h3>Zona de Risco: Exclusão de Dados</h3>
+        <p>
+            De acordo com a LGPD, você tem o direito de solicitar a eliminação dos seus dados pessoais. 
+            Como possuímos obrigações legais de retenção (histórico de notas e pagamentos), sua solicitação será enviada 
+            para análise da secretaria acadêmica, que executará a <strong>anonimização irreversível</strong> do seu perfil.
+        </p>
+        <form method="post" action="{% url 'solicitar_exclusao' %}" onsubmit="return confirm('Tem certeza que deseja solicitar a exclusão permanente da sua conta?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-excluir">Solicitar Exclusão de Conta</button>
+        </form>
+    </div>
+
+</div>
 {% endblock %}
