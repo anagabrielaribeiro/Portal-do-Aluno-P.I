@@ -34,7 +34,7 @@ class Aluno(models.Model):
     endereco = models.CharField(max_length=255)
     ra = models.CharField(max_length= 20, unique= True, help_text='Registro academco')
     data_ultima_alteracao_contato = models.DateTimeField(null=True, blank=True) # guarda quando foi a ultima vez que telefone/endereço foram alterados
-
+    dados_anonimizados = models.BooleanField(default=False) # marca se os dados doaluno já foram anonimizados por pedido de exclusão
 
     def __str__(self):
         return self.nome

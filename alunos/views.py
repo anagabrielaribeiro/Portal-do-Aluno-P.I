@@ -22,6 +22,12 @@ def dados_pessoais(request):
     # busca a matricula ativa do aluno
     matricula_atual = aluno.matriculas.filter(status='ativa').select_related('curso', 'turma').first()
 
+    # Busca todo o histórico acadêmico do aluno
+    todas_matriculas = aluno.matriculas.all().order_by('-periodo_letivo')
+
+    historico_notas = []
+    historico_financeiro = []
+
     # trata o envio do formulario de telefone e endereco, a página ve pra ca quando o aluo clica em salvar
     if request.method == 'POST': 
         form = AlunoContatoForm(request.POST, instance=aluno) # request.Post tem os dados digitados e o instance=aluno não deixa criar um aluno novo e sim atualizar
@@ -36,6 +42,9 @@ def dados_pessoais(request):
     context = {
         'aluno': aluno,
         'matricula_atual': matricula_atual,
+        'todas_matriculas': todas_matriculas,
+        'historico_notas': historico_notas,
+        'historico_financeiro': historico_financeiro,
         'form': form,
     }
     # renderiza a pagina 

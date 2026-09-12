@@ -112,6 +112,35 @@
         {% endif %}
     </div>
 
+    <div class="card">
+        <h3>Histórico de Matrículas (LGPD)</h3>
+        {% for mat in todas_matriculas %}
+            <label>PERÍODO: {{ mat.periodo_letivo }}</label>
+            <p>{{ mat.curso.nome }} - {{ mat.get_status_display }}</p>
+            {% if not forloop.last %}<br>{% endif %}
+        {% empty %}
+            <p>Nenhum histórico de matrículas encontrado.</p>
+        {% endfor %}
+    </div>
+
+    <div class="card">
+        <h3>Histórico de Notas (LGPD)</h3>
+        {% if historico_notas %}
+            <!-- Espaço reservado para quando o app de notas for integrado -->
+        {% else %}
+            <p>Nenhum registro de notas vinculado ao seu CPF no momento.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Dados Financeiros (LGPD)</h3>
+        {% if historico_financeiro %}
+            <!-- Espaço reservado para quando o app financeiro for integrado -->
+        {% else %}
+            <p>Nenhum histórico de boletos ou mensalidades vinculado ao seu CPF.</p>
+        {% endif %}
+    </div>
+
 </div>
 
 <script>

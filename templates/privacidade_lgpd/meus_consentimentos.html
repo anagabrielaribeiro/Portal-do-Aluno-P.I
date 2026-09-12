@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/privacidade.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- cria o pop up com o li e acordo -->
+{% if mostrar_popup %}
+{# adicionado: pop-up de primeiro acesso, mostra pra que servem os dados antes de liberar a tela #}
+<div class="popup-overlay">
+  <div class="popup-caixa">
+    <h3>Uso dos seus dados pessoais</h3>
+    <p>
+        O Portal do Aluno P.I. coleta e utiliza seus dados pessoais estritamente
+        para as finalidades abaixo, conforme a Lei Geral de Proteção de Dados (LGPD):
+    </p>
+    <ul>
+      {% for f in finalidades %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+    <p>
+        Você pode revogar este consentimento a qualquer momento na tela de
+        "Meus consentimentos", exceto para dados exigidos por obrigação legal
+        (como CPF para matrícula).
+    </p>
+    <form method="post" action="{% url 'aceitar_termos' %}">
+      {% csrf_token %}
+      <button type="submit">Li e concordo</button>
+    </form>
+</div>
+</div>
+{% endif %}
+
+
+<div class="conteudo-padrao-dashboard"> 
+    
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar</a>
+
+    <div class="header-privacidade">
+        <h2>Privacidade e LGPD</h2>
+        <a href="{% url 'exportar_dados_json' %}" class="btn-exportar">
+            ↓ Exportar Meus Dados (JSON)
+        </a>
+    </div>
+
+    <p class="texto-descritivo">
+        Aqui você gerencia suas preferências de privacidade. Faça o download de todas as informações que a instituição possui sobre você em formato estruturado ou revogue permissões concedidas anteriormente.
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alerta-sucesso">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <h2>Meus consentimentos</h2>
+
+    <table class="tabela-consentimentos">
+      <tr>
+        <th>Finalidade</th>
+        <th>Aceito em</th>
+        <th>Versão</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+      {% for c in consentimentos %}
+      <tr>
+        <td>{{ c.finalidade }}</td>
+        <td>{{ c.data_registro|date:"d/m/Y" }}</td>
+        <td>{{ c.versao_termo }}</td>
+        <td>
+          {% if c.data_revogacao %}
+            <span class="status-revogado">Revogado em {{ c.data_revogacao|date:"d/m/Y" }}</span>
+          {% else %}
+            <span class="status-ativo">Ativo</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if not c.data_revogacao %}
+          <form method="post" action="{% url 'revogar_consentimento' c.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-revogar">Revogar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="zona-risco">
+        <h3>Zona de Risco: Exclusão de Dados</h3>
+        <p>
+            De acordo com a LGPD, você tem o direito de solicitar a eliminação dos seus dados pessoais. 
+            Como possuímos obrigações legais de retenção (histórico de notas e pagamentos), sua solicitação será enviada 
+            para análise da secretaria acadêmica, que executará a <strong>anonimização irreversível</strong> do seu perfil.
+        </p>
+        <form method="post" action="{% url 'solicitar_exclusao' %}" onsubmit="return confirm('Tem certeza que deseja solicitar a exclusão permanente da sua conta?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-excluir">Solicitar Exclusão de Conta</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

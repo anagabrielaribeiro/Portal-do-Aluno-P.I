@@ -1,0 +1,75 @@
+/* estilo da tabela de consentimentos */
+
+/* deixa a tabela ocupar toda a largura e junta as bordas das células */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+/* espaçamento interno e borda em cada célula (cabeçalho e dados) */
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* cabeçalho da tabela com cor roxa, igual o resto do projeto */
+th {
+    color: #7C3AED;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+/* texto normal das células */
+td {
+    font-size: 14px;
+    color: #111827;
+}
+
+/* botão de revogar */
+button {
+    background: #7C3AED;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* muda a cor do botão quando o mouse passa em cima */
+button:hover {
+    background: #5b21b6;
+}
+
+/* link de voltar ao dashboard */
+.link-voltar {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #7C3AED;
+    text-decoration: none;
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+}
+
+/* pop-up de aceite de termos */
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.popup-caixa {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 400px;
+}
