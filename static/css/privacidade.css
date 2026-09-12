@@ -43,7 +43,7 @@ button:hover {
     background: #5b21b6;
 }
 
-/* adicionado: link de voltar ao dashboard */
+/* link de voltar ao dashboard */
 .link-voltar {
     display: inline-block;
     margin-bottom: 12px;
@@ -54,4 +54,22 @@ button:hover {
 
 .link-voltar:hover {
     text-decoration: underline;
+}
+
+/* pop-up de aceite de termos */
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.popup-caixa {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 400px;
 }

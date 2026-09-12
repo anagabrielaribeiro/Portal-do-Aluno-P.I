@@ -7,15 +7,44 @@ from django.http import JsonResponse
 from django.contrib import messages
 
 from .models import Consentimento
+from .mapeamento import DADOS_PESSOAIS
 
 
 @login_required
 def meus_consentimentos(request):
     # pega só os consentimentos do aluno logado
     consentimentos = request.user.aluno.consentimentos.all()
+
+    # se o aluno ainda não tem consentimento, aparece popup
+    mostrar_popup = not consentimentos.exists()
+
+    # pega as finalidades unicas listadas no mapeamento, sem repetir 
+    finalidades = sorted(set(d['finalidade'] for d in DADOS_PESSOAIS))
+
+    # lista de consentimentos do aluno que pode estar vazia, e diz pro template se deve mostrar o pop_up
     return render(request, 'privacidade_lgpd/meus_consentimentos.html', {
         'consentimentos': consentimentos,
+        'mostrar_popup' : mostrar_popup,
+        'finalidades': finalidades,
     })
+
+
+
+# cria um consentimento pra cada finalidade quando o aluno clica "li e concordo"
+@login_required
+@require_POST
+def aceitar_termos(request):
+    aluno = request.user.aluno  # pega o aluno ligado ao usuário logado
+
+    # pega as finalidades do mapeamento.py, sem repetir (set remove duplicadas, sorted ordena)
+    finalidades = sorted(set(d['finalidade'] for d in DADOS_PESSOAIS))
+
+    # percorre cada finalidade e cria um Consentimento pra cada uma
+    for finalidade in finalidades:
+        Consentimento.objects.create(aluno=aluno, finalidade=finalidade)
+
+    # depois de criar tudo, volta pra tela de consentimentos
+    return redirect('meus_consentimentos')
 
 
 @login_required

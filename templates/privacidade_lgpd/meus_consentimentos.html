@@ -1,13 +1,40 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/privacidade.css' %}">
 {% endblock %}
 
 {% block content %}
-{% load static %}
 
-<!-- Aqui é onde a mágica do layout vai acontecer -->
+<!-- cria o pop up com o li e acordo -->
+{% if mostrar_popup %}
+{# adicionado: pop-up de primeiro acesso, mostra pra que servem os dados antes de liberar a tela #}
+<div class="popup-overlay">
+  <div class="popup-caixa">
+    <h3>Uso dos seus dados pessoais</h3>
+    <p>
+        O Portal do Aluno P.I. coleta e utiliza seus dados pessoais estritamente
+        para as finalidades abaixo, conforme a Lei Geral de Proteção de Dados (LGPD):
+    </p>
+    <ul>
+      {% for f in finalidades %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+    <p>
+        Você pode revogar este consentimento a qualquer momento na tela de
+        "Meus consentimentos", exceto para dados exigidos por obrigação legal
+        (como CPF para matrícula).
+    </p>
+    <form method="post" action="{% url 'aceitar_termos' %}">
+      {% csrf_token %}
+      <button type="submit">Li e concordo</button>
+    </form>
+</div>
+</div>
+{% endif %}
+
+
 <div class="conteudo-padrao-dashboard"> 
     
     <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar</a>
