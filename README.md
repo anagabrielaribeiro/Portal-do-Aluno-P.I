@@ -56,26 +56,90 @@ A estrutura de diretórios do projeto seguirá a organização abaixo:
 
 ```text
 portal_aluno/
-|-- settings.py manage.py
-|-- settings.py config/
-│   |-- settings.py
-│   |-- urls.py
-│   |-- asgi.py
-│   |-- wsgi.py
-|-- autenticacao/
-|-- alunos/
-|-- matriculas/
-|-- notas/
-|-- financeiro/
-|-- calendario_horarios/
-|-- agenda/
-|-- documentos_certificados/
-|-- tarefas/
-|-- privacidade_lgpd/
-|-- templates/
-|-- static/
+|-- manage.py
 |-- requirements.txt
-```
+|-- README.md
+|-- LICENSE
+|-- .gitignore
+|
+|-- config/
+|   |-- settings.py
+|   |-- urls.py
+|   |-- asgi.py
+|   |-- wsgi.py
+|
+|-- alunos/
+|   |-- models.py
+|   |-- views.py
+|   |-- urls.py
+|   |-- forms.py
+|   |-- admin.py
+|
+|-- autenticacao/
+|   |-- models.py
+|   |-- views.py
+|   |-- urls.py
+|   |-- admin.py
+|
+|-- privacidade_lgpd/
+|   |-- models.py
+|   |-- views.py
+|   |-- urls.py
+|   |-- admin.py
+|   |-- mapeamento.py
+|   |-- context_processors.py
+|
+|-- matriculas/
+|   |-- models.py
+|   |-- views.py
+|   |-- urls.py
+|   |-- admin.py
+|
+|-- recuperacao_senha/
+|   |-- models.py
+|   |-- views.py
+|   |-- urls.py
+|   |-- tests.py
+|
+|-- agenda/
+|-- calendario_horarios/
+|-- documentos_certificados/
+|-- financeiro/
+|-- notas/
+|-- tarefas/
+|
+|-- templates/
+|   |-- base.html
+|   |-- alunos/
+|   |   |-- dados_pessoais.html
+|   |-- autenticacao/
+|   |   |-- login.html
+|   |   |-- dashboard.html
+|   |   |-- ativar_2fa.html
+|   |   |-- verificar_2fa.html
+|   |-- matriculas/
+|   |   |-- minhas_matriculas.html
+|   |-- privacidade_lgpd/
+|   |   |-- meus_consentimentos.html
+|   |-- recuperacao_senha/
+|       |-- password_reset_form.html
+|   |   |-- password_reset_email.html
+|   |   |-- password_reset_done.html
+|   |   |-- password_reset_confirm.html
+|   |   |-- password_reset_complete.html
+|
+|-- static/
+    |-- css/ 
+    |   |-- style.css 
+    |   |-- aluno.css 
+    |   |-- matricula.css 
+    |   |-- privacidade.css
+    |-- js/
+    |   |-- main.js
+    |-- images/
+        |-- logo.jpeg
+ ```
+
 
 
 **Integrantes:**
