@@ -1,30 +1,25 @@
-
-{% load static %} 
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
-
-    <!-- Faz a página se adaptar a diferentes tamanhos de tela -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Portal do Aluno</title>
 
-    <!-- Carrega o arquivo de estilos da página -->
+    <!-- mesmo CSS do login do aluno, garante visual idêntico -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
 
-    <!-- Área principal da tela de login -->
     <main class="login-split">
 
-        <!-- Parte esquerda com informações sobre o portal -->
+        <!-- Parte esquerda, igual ao login do aluno -->
         <section class="painel-esquerdo">
 
-            <!-- Logo e nome do portal -->
             <div class="marca">
                 <div class="marca-icone">
                     <img src="{% static 'images/logo.jpeg' %}" alt="Logo Portal do Aluno">
@@ -32,13 +27,11 @@
                 <span>Portal do Aluno P.I</span>
             </div>
 
-            <!-- Título principal da página -->
             <h1>
                 Toda a sua vida acadêmica em
                 um único ambiente.
             </h1>
 
-            <!-- Descrição dos serviços disponíveis no portal -->
             <p class="descricao">
                 Gestão acadêmica e autoatendimento do estudante:
                 acompanhe notas, frequência, situação financeira,
@@ -46,7 +39,6 @@
                 atendimento presencial.
             </p>
 
-            <!-- Cards com algumas das principais funções do portal -->
             <div class="cards-info">
 
                 <div class="card-info">
@@ -68,26 +60,23 @@
 
         </section>
 
-        <!-- Parte direita com os campos de login -->
+        <!-- Parte direita: aqui muda o texto pra refletir que é o colaborador -->
         <section class="painel-direito">
 
             <div class="form-wrapper">
 
-                <!-- Identifica a área de acesso do usuário -->
-                <span class="eyebrow">Acesso do estudante</span>
+                <span class="eyebrow">Acesso do colaborador</span>
 
-                <h2>Entrar no portal</h2>
+                <h2>Entrar como colaborador</h2>
 
                 <p class="subtitulo">Use seu usuário e senha institucional.</p>
 
-                <!-- Exibe uma mensagem de erro quando o login não é válido -->
                 {% if erro %}
                     <p class="erro">
                         {{ erro }}
                     </p>
                 {% endif %}
 
-                <!-- Exibe mensagens enviadas pelo Django -->
                 {% if messages %}
                     {% for message in messages %}
                         <p class="{{ message.tags }}">
@@ -96,10 +85,8 @@
                     {% endfor %}
                 {% endif %}
 
-                <!-- Formulário usado para enviar os dados de login -->
                 <form method="post">
 
-                    
                     {% csrf_token %}
 
                     <div>
@@ -107,7 +94,6 @@
                             Usuário
                         </label>
 
-                        <!-- Campo para informar o usuário -->
                         <input
                             type="text"
                             id="username"
@@ -121,7 +107,6 @@
                             Senha
                         </label>
 
-                        <!-- Campo para informar a senha -->
                         <input
                             type="password"
                             id="password"
@@ -129,25 +114,17 @@
                             required
                         >
 
-                        <!-- Link "esqueci minha senha", padrão comum
-                        em telas de login -->
                         <a href="{% url 'password_reset' %}" class="esqueci-senha">
                             Esqueci minha senha
                         </a>
                     </div>
 
-                    <!-- Envia os dados -->
                     <button type="submit">
                         Entrar
                     </button>
 
                 </form>
 
-                <a href="{% url 'login_colaborador' %}" class="acesso-colaborador">
-                    Acesso como colaborador da instituição
-                </a>
-
-                <!-- Explica como funciona a autenticação em dois fatores -->
                 <div class="aviso-autenticador">
                     <strong>Autenticação em dois fatores (2FA)</strong>
                     <p>
@@ -163,10 +140,8 @@
 
     </main>
 
-    <!-- Carrega o JavaScript da aplicação -->
     <script src="{% static 'js/main.js' %}"></script>
 
 </body>
 
 </html>
-

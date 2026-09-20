@@ -7,4 +7,5 @@ urlpatterns = [
     path('verificar-2fa/', views.verificar_2fa_view, name='verificar_2fa'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
+    path('login/colaborador/', views.login_colaborador_view, name='login_colaborador'),
 ]

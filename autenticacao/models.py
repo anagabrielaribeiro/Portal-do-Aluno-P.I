@@ -66,6 +66,15 @@ class Usuario(AbstractUser):
         return self.username
     
 
+class Colaborador (models.Model): 
+    # liga esse registro a um usuario já existe ( logins,senha,email,2fa continuam lá)
+    usuario = models.OneToOneField('autenticacao.Usuario', on_delete=models.CASCADE)    
+    cargo = models.CharField(max_length=100, blank=True) 
+
+    def __str__(self):
+        return self.usuario.get_full_name() or self.usuario.username 
+    
+
 class LogAutenticacao(models.Model):
     usuario = models.ForeignKey(
         'autenticacao.Usuario', on_delete=models.SET_NULL, null=True, blank=True
@@ -86,3 +95,4 @@ class LogAutenticacao(models.Model):
 
     def delete (self, *args, **kwargs):# repassa exatamente os mesmos argumentos que chegaram
         raise ValueError('Logs de autenticação não pode ser excluídos')
+

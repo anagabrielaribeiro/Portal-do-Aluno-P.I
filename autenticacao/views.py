@@ -80,6 +80,15 @@ def login_view(request):
 
         if usuario_autenticado is not None:
 
+            # garante que só quem tem perfil de aluno cosnegue entrar pela tela aluno
+            # mesmo que a senha esteja certa, se não existir aluno vinculado a usuario, não entra
+            if not hasattr(usuario_autenticado, 'aluno'):
+                messages.error(
+                    request,
+                    'usuario ou senha incorretos'
+                )
+                return render(request,'autenticacao/login.html')
+
             # Zera o contador de tentativas erradas.
             usuario_autenticado.tentativas_login_falha = 0
 
@@ -136,7 +145,90 @@ def login_view(request):
         'autenticacao/login.html'
     )
 
+# ---------------------------------------------------------
+# LOGIN COLABORADOR
+# ---------------------------------------------------------
 
+def login_colaborador_view(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        senha = request.POST.get('password')
+
+        # procura o usuario pelo nome do usuario
+        try:
+            usuario = Usuario.objects.get(username=username)
+        except Usuario.DoesNotExist:
+            usuario = None
+
+        # verifica se a conta está temporariamente bloqueada
+        if usuario and usuario.esta_bloqueado():
+            messages.error(
+                request,
+                'conta bloquada temporariamente'
+                'Tente novamente mais tarde'
+            )
+            return render(request, 'autenticacao/login_colaborador.html')
+
+        # verifica usuario e senha
+        usuario_autenticado = authenticate(
+            request,
+            username=username,
+            password=senha
+        )
+
+        # so passa se autenticou e tem perfil de colaborador vinculado
+        # impede que um aluno de entrar por aqui, mesmo com senha certa
+        if usuario_autenticado is not None and hasattr(usuario_autenticado, 'colaborador'):
+
+            #zera o contador de tentativas erradas
+            usuario_autenticado.tentativas_login_falha = 0
+            usuario_autenticado.save(update_fields=['tentativas_login_falha'])
+
+            # guarda temporariamente o usuario na sessão, igual o fluxo do aluno
+            request.session['usuario_pendente_id'] = usuario_autenticado.id
+
+            #marca que esse login veio da tela de colaborador
+            # pra a função 2fa saber onde mandar (admin, não dashboard)
+            request.session['tipo_login'] = 'colaborador'
+
+            # verrifica se o usuario já configurou o 2fa
+            if usuario_autenticado.autentificacao_dois_fatores:
+                return redirect('verificar_2fa')
+
+            return redirect('ativar_2fa')
+
+        #senha incorreta ounão é colaborador conta como tentativa falha
+        if usuario:
+            usuario.tentativas_login_falha += 1
+
+            if usuario.tentativas_login_falha >= limite_tentativas:
+                usuario.bloqueio_ate = (
+                    timezone.now()
+                    + timedelta(minutes=tempo_bloqueio)
+                )
+
+            usuario.save(
+                update_fields=[
+                    'tentativas_login_falha',
+                    'bloqueio_ate'
+                ]
+            )
+
+        messages.error(
+            request,
+            'Usuario ou senha incorretos'
+        )
+
+        return render(
+            request,
+            'autenticacao/login_colaborador.html'
+        )
+
+    return render(
+        request,
+        'autenticacao/login_colaborador.html'
+    )
 # ---------------------------------------------------------
 # ATIVAÇÃO DO 2FA
 # ---------------------------------------------------------
@@ -241,6 +333,10 @@ def ativar_2fa_view(request):
                 'Autenticação de dois fatores ativada com sucesso.'
             )
 
+            # se o login veio da tela do colaborador manda pro admin
+            if request.session.pop('tipo_login', None) == 'colaborador':
+                return redirect('/admin/')
+
             return redirect('dashboard')
 
         messages.error(
@@ -315,6 +411,10 @@ def verificar_2fa_view(request):
                     'ultimo_ip_acesso'
                 ]
             )
+
+            # se o login veio da tela do colaborador manda pro admin
+            if request.session.pop('tipo_login', None) == 'colaborador':
+                return redirect('/admin/')
 
             return redirect('dashboard')
 
