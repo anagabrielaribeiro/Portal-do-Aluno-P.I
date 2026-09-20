@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tarefas - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tarefas.css' %}">
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar</a>
+
+<h2>Minhas Tarefas</h2>
+<a href="{% url 'criar_tarefa' %}" class="btn-nova-tarefa">+ Nova tarefa</a>
+
+<ul class="lista-tarefas">
+    {% for tarefa in tarefas %}
+    <li class="item-tarefa {% if tarefa.concluida %}concluida{% endif %}">
+        <!-- a classe concluida so entra na li quando tarefa.concluida e True, usada no CSS pra riscar o texto -->
+        <span class="titulo-tarefa">{{ tarefa.titulo }}</span>
+        <div class="acoes-tarefa">
+            <a href="{% url 'editar_tarefa' tarefa.pk %}">Editar</a>
+            <a href="{% url 'apagar_tarefa' tarefa.pk %}">Apagar</a>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tarefa - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tarefas.css' %}">
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'lista_tarefas' %}" class="link-voltar">&larr; Voltar</a>
+
+<h2>{% if tarefa %}Editar Tarefa{% else %}Nova Tarefa{% endif %}</h2>
+<!-- se a variavel tarefa existir, esta editando uma existente, senao esta criando uma nova -->
+
+<form method="post" class="form-tarefa">
+    {% csrf_token %}
+    <input type="text" name="titulo" value="{{ tarefa.titulo|default:'' }}" placeholder="Título" required>
+    <!-- default vazio evita mostrar a palavra None quando for uma tarefa nova -->
+    <textarea name="descricao" placeholder="Descrição">{{ tarefa.descricao|default:'' }}</textarea>
+    {% if tarefa %}
+    <label>
+        <input type="checkbox" name="concluida" {% if tarefa.concluida %}checked{% endif %}>
+        Concluída
+    </label>
+    <!-- esse checkbox so aparece na edicao, nao faz sentido marcar concluida ao criar uma tarefa nova -->
+    {% endif %}
+    <button type="submit">Salvar</button>
+</form>
+{% endblock %}

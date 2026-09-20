@@ -1,0 +1,83 @@
+/* estilo da lista de tarefas */
+
+.link-voltar {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #7C3AED;
+    text-decoration: none;
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+}
+
+.btn-nova-tarefa {
+    display: inline-block;
+    margin: 12px 0 20px;
+    background: #7C3AED;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-nova-tarefa:hover {
+    background: #5b21b6;
+}
+
+.lista-tarefas {
+    list-style: none;
+    padding: 0;
+}
+
+.item-tarefa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* risca o titulo quando a tarefa esta marcada como concluida */
+.item-tarefa.concluida .titulo-tarefa {
+    text-decoration: line-through;
+    color: #9CA3AF;
+}
+
+.acoes-tarefa a {
+    margin-left: 10px;
+    color: #7C3AED;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.acoes-tarefa a:hover {
+    text-decoration: underline;
+}
+
+.form-tarefa input,
+.form-tarefa textarea {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-tarefa button {
+    background: #7C3AED;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.form-tarefa button:hover {
+    background: #5b21b6;
+}

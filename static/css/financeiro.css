@@ -1,0 +1,67 @@
+/* estilo da tabela do demonstrativo financeiro */
+
+.tabela-financeiro {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.tabela-financeiro th, .tabela-financeiro td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tabela-financeiro th {
+    color: #7C3AED;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.tabela-financeiro td {
+    font-size: 14px;
+    color: #111827;
+}
+
+/* verde para boleto pago */
+.status-pago {
+    color: #16A34A;
+    font-weight: 600;
+}
+
+/* amarelo/laranja para boleto ainda dentro do prazo */
+.status-pendente {
+    color: #D97706;
+    font-weight: 600;
+}
+
+/* vermelho para boleto que passou do vencimento sem pagamento */
+.status-atrasado {
+    color: #B91C1C;
+    font-weight: 700;
+}
+
+.btn-baixar {
+    background: #7C3AED;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.btn-baixar:hover {
+    background: #5b21b6;
+}
+
+.link-voltar {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #7C3AED;
+    text-decoration: none;
+}
+
+.link-voltar:hover {
+    text-decoration: underline;
+}

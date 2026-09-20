@@ -17,12 +17,20 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('autenticacao.urls')),
+    path('admin/', admin.site.urls), # tela administrativa que a instituição usa
+    path('', include('autenticacao.urls')), #
     path('', include('recuperacao_senha.urls')),
     path('alunos/', include('alunos.urls')),
     path('matriculas/', include('matriculas.urls')),
     path('privacidade/', include('privacidade_lgpd.urls')),
+    path('financeiro/', include('financeiro.urls')),
+    path('tarefas/', include('tarefas.urls')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# soma essa nova rota a lista de rotas que ja existe
+# essa rota faz o Django entregar os arquivos que estao na pasta media 

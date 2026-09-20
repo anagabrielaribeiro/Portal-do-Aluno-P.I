@@ -215,3 +215,6 @@ LOGGING = {
 # Tempo, em segundos, que o link de recuperação continua válido.
 # 3600 segundos = 1 hora.
 PASSWORD_RESET_TIMEOUT = 3600
+
+MEDIA_URL = '/media/' # prefixo de URL usado pra acessar os arquivos enviados, tipo os boletos
+MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam salvos

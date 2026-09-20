@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Financeiro - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/financeiro.css' %}">
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar</a>
+
+<h2>Demonstrativo Financeiro</h2>
+
+<table class="tabela-financeiro">
+    <tr>
+        <th>Mês</th>
+        <th>Vencimento</th>
+        <th>Valor</th>
+        <th>Status</th>
+        <th>Boleto</th>
+    </tr>
+    {% for boleto in boletos %}
+    <tr>
+        <td>{{ boleto.mes_referencia }}</td>
+        <td>{{ boleto.vencimento|date:"d/m/Y" }}</td>
+        <td>R$ {{ boleto.valor }}</td>
+        <td>
+            {% if boleto.pago %}
+                {# se pago e True, mostra Pago independente da data #}
+                <span class="status-pago">Pago</span>
+            {% elif boleto.vencimento < hoje %}
+                {# se nao esta pago e a data de vencimento ja passou, mostra Atrasado #}
+                <span class="status-atrasado">Atrasado</span>
+            {% else %}
+                {# se nao esta pago e ainda nao venceu, mostra Pendente #}
+                <span class="status-pendente">Pendente</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if not boleto.pago %}
+                <a href="{{ boleto.arquivo.url }}" class="btn-baixar" download>Baixar boleto</a>
+            {% else %}
+                {{ "-" }}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
