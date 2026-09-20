@@ -3,13 +3,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-
+from .models import Usuario, LogAutenticacao
 import pyotp
 import qrcode
 import io
 import base64
 
-from .models import Usuario
 
 
 # Quantidade máxima de tentativas de login antes do bloqueio.
@@ -213,6 +212,17 @@ def ativar_2fa_view(request):
             # Agora o login é realmente efetuado.
             login(request, usuario)
 
+            # --------------------------------------------------------------------------
+            # LOG DE AUTENTICAÇÃO
+            # --------------------------------------------------------------------------------
+
+            LogAutenticacao.objects.create(
+                usuario=usuario, # usuario que acabou de configurar o 2fa e logar
+                ra_registrado=getattr(usuario, 'ra', ''), # pega o RA do usuario
+                ip=obter_ip(request), # pega o ip de quem fez a requisiçãi
+            ) # mesmo sendo o primeiro acesso, esse também conta como sucesso
+
+
             # Registra o último login.
             usuario.ultimo_login = timezone.now()
 
@@ -283,6 +293,15 @@ def verificar_2fa_view(request):
 
             # Efetua o login definitivo.
             login(request, usuario)
+
+            # ------------------------------------------------------
+            # LOG AUTENTICACAO
+            # ----------------------------------------------------------------
+            LogAutenticacao.objects.create(
+                usuario=usuario,
+                ra_registrado=getattr(usuario, 'ra', ''),
+                ip=obter_ip(request),
+            ) # cira o log só depois do login(), porque só aqui o login está realmente completo
 
             # Registra data e hora do último login.
             usuario.ultimo_login = timezone.now()
