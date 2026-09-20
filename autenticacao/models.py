@@ -65,3 +65,24 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.username
     
+
+class LogAutenticacao(models.Model):
+    usuario = models.ForeignKey(
+        'autenticacao.Usuario', on_delete=models.SET_NULL, null=True, blank=True
+    ) # guarda o usuario que fez o login, o SET_NULL é para se caso o usuario for apagado o campo do log fica null
+    # mas o log em si continua existindo
+    ra_registrado = models.CharField(max_length=20, blank=True) # guarda o RA no momento do login, mesmo se o usuario for apagado 
+    evento = models.CharField(max_length=30, default='login_sucesso') # tipodo evento registrado
+    ip = models.GenericIPAddressField(null=True, blank=True) # ip de quem fez login
+    data_hora = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['id'] # ordena os logs pela ordem em que foram criados
+
+    def save(self, *args, **kwargs):# repassa exatamente os mesmos argumentos que chegaram
+        if self.pk: # se já tem primary key, é uma tentativa de editar um log que já existe
+            raise ValueError('Logs de autenticação são append-only e não pode ser alterados') # não deixa editar
+        super().save(*args, **kwargs) # salva o log normalmente, só quando é um log novo
+
+    def delete (self, *args, **kwargs):# repassa exatamente os mesmos argumentos que chegaram
+        raise ValueError('Logs de autenticação não pode ser excluídos')
