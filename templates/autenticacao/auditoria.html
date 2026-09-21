@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Painel de Auditoria e Segurança - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="matriculas-header">
+    <span class="matriculas-label">AMBIENTE CONTROLADO DE SEGURANÇA</span>
+    <h1>Painel de Auditoria de Acessos</h1>
+    <p class="matriculas-descricao">
+        Monitoramento em tempo real de falhas de autenticação, tentativas de força bruta e bloqueios temporários de conta (Atividades 5.2 e 5.4).
+    </p>
+</div>
+
+<div class="historico-matriculas" style="margin-top: 32px;">
+    <h3>Registros de Segurança do Sistema</h3>
+    
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>DATA / HORA</th>
+                <th>RISCO</th>
+                <th>AÇÃO DETECTADA</th>
+                <th>USUÁRIO ALVO</th>
+                <th>IP DE ORIGEM</th>
+                <th>DETALHES DO EVENTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.data_hora|date:"d/m/Y H:i:s" }}</td>
+                <td>
+                    {% if log.risco == 'critico' %}
+                        <span class="badge badge-trancada">{{ log.get_risco_display }}</span>
+                    {% elif log.risco == 'medio' %}
+                        <span class="badge" style="background: #fef3c7; color: #d97706;">{{ log.get_risco_display }}</span>
+                    {% else %}
+                        <span class="badge badge-cancelada">{{ log.get_risco_display }}</span>
+                    {% endif %}
+                </td>
+                <td><strong>{{ log.get_acao_display }}</strong></td>
+                <td>
+                    {% if log.usuario %}
+                        {{ log.usuario.username }}
+                    {% else %}
+                        <span style="color: #6b7280; font-style: italic;">Desconhecido</span>
+                    {% endif %}
+                </td>
+                <td><code>{{ log.ip_origem|default:"Não registrado" }}</code></td>
+                <td>{{ log.detalhes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p style="margin-top: 16px; color: #6b7280;">Nenhum evento de segurança registrado no banco de dados até o momento. Tente errar o login para gerar dados de teste!</p>
+    {% endif %}
+</div>
+
+{% endblock %} 

@@ -1,0 +1,76 @@
+/* Estilos exclusivos para o Painel de Auditoria */
+
+.auditoria-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Tabela de logs estilizada */
+.tabela-auditoria {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    margin-top: 16px;
+}
+
+.tabela-auditoria th {
+    background: #f9fafb;
+    color: #4b5563;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.tabela-auditoria td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #1f2937;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.tabela-auditoria tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Badges de Risco personalizados */
+.badge-risco {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-critico {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-medio {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.badge-baixo {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+/* Caixa de IP e detalhes técnicos */
+.codigo-ip {
+    font-family: monospace;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+}

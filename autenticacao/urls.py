@@ -7,4 +7,5 @@ urlpatterns = [
     path('verificar-2fa/', views.verificar_2fa_view, name='verificar_2fa'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('logout/', views.logout_view, name='logout'),
+    path('painel-auditoria/', views.painel_auditoria_view, name='painel_auditoria'),
 ]

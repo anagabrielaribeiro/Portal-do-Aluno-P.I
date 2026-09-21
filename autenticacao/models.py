@@ -29,7 +29,7 @@ class Usuario(AbstractUser):
 
 
     # registra o ultimo login que deu certo
-    # o login só conta como completo quando passa pelo 2f
+    # o login só conta como completo quando passa pelo 2fa
     ultimo_login = models.DateTimeField(
         null= True,
         blank= True,
@@ -64,4 +64,39 @@ class Usuario(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class LogAuditoria(models.Model):
+    """
+    Tabela para registrar os logs de segurança e auditoria (Atividade 5.2).
+    Guarda quem tentou acessar, o que deu errado, o nível de risco e o IP.
+    """
+
+    class Acao(models.TextChoices):
+        LOGIN_FALHO = 'login_falho', 'Falha na Senha'
+        BLOQUEIO = 'bloqueio', 'Bloqueio por Tentativas'
+        TOTP_FALHO = 'totp_falho', 'Falha no Código 2FA'
+
+    class Risco(models.TextChoices):
+        BAIXO = 'baixo', 'Baixo'
+        MEDIO = 'medio', 'Médio'
+        CRITICO = 'critico', 'Crítico'
+
+    # null=True e blank=True para o caso de tentarem invadir com um usuário que nem existe
+    usuario = models.ForeignKey(
+        'autenticacao.Usuario',
+        on_delete=models.CASCADE,
+        related_name='logs_seguranca',
+        null=True, blank=True
+    )
     
+    acao = models.CharField(max_length=50, choices=Acao.choices)
+    risco = models.CharField(max_length=20, choices=Risco.choices, default=Risco.BAIXO)
+    ip_origem = models.GenericIPAddressField(null=True, blank=True, help_text="IP de onde veio a tentativa")
+    detalhes = models.TextField(blank=True, null=True, help_text="Detalhes extras do evento")
+    data_hora = models.DateTimeField(auto_now_add=True) # Preenche sozinho com a hora do servidor
+
+    def __str__(self):
+        # Como o registro vai aparecer se a gente der um "print" nele
+        nome_user = self.usuario.username if self.usuario else "Desconhecido"
+        return f"[{self.get_risco_display().upper()}] {self.get_acao_display()} - {nome_user}"
