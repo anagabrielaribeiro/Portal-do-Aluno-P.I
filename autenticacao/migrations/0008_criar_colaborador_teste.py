@@ -23,8 +23,10 @@ def remover_colaborador_teste(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('autenticacao', '0007_merge_0005_logauditoria_0006_colaborador'),  
+        ('autenticacao', '0005_logauditoria'),
+        ('autenticacao', '0006_colaborador'),
     ]
+
 
     operations = [
         migrations.RunPython(criar_colaborador_teste, remover_colaborador_teste),
