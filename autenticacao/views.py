@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
-
+from .models import Usuario, LogAutenticacao
 import pyotp
 import qrcode
 import io
@@ -66,6 +66,17 @@ def login_view(request):
 
         # SENHA CORRETA
         if usuario_autenticado is not None:
+
+
+            # garante que só quem tem perfil de aluno cosnegue entrar pela tela aluno
+            # mesmo que a senha esteja certa, se não existir aluno vinculado a usuario, não entra
+            if not hasattr(usuario_autenticado, 'aluno'):
+                messages.error(
+                    request,
+                    'usuario ou senha incorretos'
+                )
+                return render(request,'autenticacao/login.html')
+
             # Zera o contador de tentativas erradas.
             usuario_autenticado.tentativas_login_falha = 0
             usuario_autenticado.save(
@@ -137,6 +148,89 @@ def login_view(request):
     )
 
 
+# LOGIN COLABORADOR
+def login_colaborador_view(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        senha = request.POST.get('password')
+
+        # procura o usuario pelo nome do usuario
+        try:
+            usuario = Usuario.objects.get(username=username)
+        except Usuario.DoesNotExist:
+            usuario = None
+
+        # verifica se a conta está temporariamente bloqueada
+        if usuario and usuario.esta_bloqueado():
+            messages.error(
+                request,
+                'conta bloquada temporariamente'
+                'Tente novamente mais tarde'
+            )
+            return render(request, 'autenticacao/login_colaborador.html')
+
+        # verifica usuario e senha
+        usuario_autenticado = authenticate(
+            request,
+            username=username,
+            password=senha
+        )
+
+        # so passa se autenticou e tem perfil de colaborador vinculado
+        # impede que um aluno de entrar por aqui, mesmo com senha certa
+        if usuario_autenticado is not None and hasattr(usuario_autenticado, 'colaborador'):
+
+            #zera o contador de tentativas erradas
+            usuario_autenticado.tentativas_login_falha = 0
+            usuario_autenticado.save(update_fields=['tentativas_login_falha'])
+
+            # guarda temporariamente o usuario na sessão, igual o fluxo do aluno
+            request.session['usuario_pendente_id'] = usuario_autenticado.id
+
+            #marca que esse login veio da tela de colaborador
+            # pra a função 2fa saber onde mandar (admin, não dashboard)
+            request.session['tipo_login'] = 'colaborador'
+
+            # verrifica se o usuario já configurou o 2fa
+            if usuario_autenticado.autentificacao_dois_fatores:
+                return redirect('verificar_2fa')
+
+            return redirect('ativar_2fa')
+
+        #senha incorreta ounão é colaborador conta como tentativa falha
+        if usuario:
+            usuario.tentativas_login_falha += 1
+
+            if usuario.tentativas_login_falha >= limite_tentativas:
+                usuario.bloqueio_ate = (
+                    timezone.now()
+                    + timedelta(minutes=tempo_bloqueio)
+                )
+
+            usuario.save(
+                update_fields=[
+                    'tentativas_login_falha',
+                    'bloqueio_ate'
+                ]
+            )
+
+        messages.error(
+            request,
+            'Usuario ou senha incorretos'
+        )
+
+        return render(
+            request,
+            'autenticacao/login_colaborador.html'
+        )
+
+    return render(
+        request,
+        'autenticacao/login_colaborador.html'
+    )
+
+
 # ATIVAÇÃO DO 2FA
 def ativar_2fa_view(request):
     # Recupera o usuário que acabou de acertar a senha.
@@ -188,6 +282,14 @@ def ativar_2fa_view(request):
             del request.session['usuario_pendente_id']
             # Agora o login é realmente efetuado.
             login(request, usuario)
+
+            # LOG DE AUTENTICAÇÃO
+            LogAutenticacao.objects.create(
+                usuario=usuario, # usuario que acabou de configurar o 2fa e logar
+                ra_registrado=getattr(usuario, 'ra', ''), # pega o RA do usuario
+                ip=obter_ip(request), # pega o ip de quem fez a requisiçãi
+            ) # mesmo sendo o primeiro acesso, esse também conta como sucesso
+
             # Registra o último login.
             usuario.ultimo_login = timezone.now()
             # Registra o IP utilizado.
@@ -202,6 +304,11 @@ def ativar_2fa_view(request):
                 request,
                 'Autenticação de dois fatores ativada com sucesso.'
             )
+
+            # se o login veio da tela do colaborador manda pro admin
+            if request.session.pop('tipo_login', None) == 'colaborador':
+                return redirect('/admin/')
+            
             return redirect('dashboard')
         else:
             # Cria log de falha de ativação do 2fa
@@ -249,6 +356,14 @@ def verificar_2fa_view(request):
             del request.session['usuario_pendente_id']
             # Efetua o login definitivo.
             login(request, usuario)
+
+            # LOG AUTENTICACAO
+            LogAutenticacao.objects.create(
+                usuario=usuario,
+                ra_registrado=getattr(usuario, 'ra', ''),
+                ip=obter_ip(request),
+            ) # cira o log só depois do login(), porque só aqui o login está realmente completo
+
             # Registra data e hora do último login.
             usuario.ultimo_login = timezone.now()
             # Registra o IP do acesso.
@@ -260,6 +375,11 @@ def verificar_2fa_view(request):
                     'ultimo_ip_acesso'
                 ]
             )
+
+            # se o login veio da tela do colaborador manda pro admin
+            if request.session.pop('tipo_login', None) == 'colaborador':
+                return redirect('/admin/')
+
             return redirect('dashboard')
         else:
             # Cria log de falha no totp
