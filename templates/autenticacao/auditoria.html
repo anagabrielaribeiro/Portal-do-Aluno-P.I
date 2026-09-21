@@ -1,13 +1,13 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Painel de Auditoria e Segurança - Portal do Aluno{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Auditoria e Segurança - Portal do Aluno</title>
     <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
-{% endblock %}
-
-{% block content %}
+</head>
+<body>
 
 <div class="matriculas-header">
     <span class="matriculas-label">AMBIENTE CONTROLADO DE SEGURANÇA</span>
@@ -15,6 +15,12 @@
     <p class="matriculas-descricao">
         Monitoramento em tempo real de falhas de autenticação, tentativas de força bruta e bloqueios temporários de conta (Atividades 5.2 e 5.4).
     </p>
+
+    
+    <a href="/admin/" style="display: inline-block; margin-top: 12px;">
+        Ir para o painel administrativo do Django
+    </a>
+    
 </div>
 
 <div class="historico-matriculas" style="margin-top: 32px;">
@@ -64,4 +70,5 @@
     {% endif %}
 </div>
 
-{% endblock %} 
+</body>
+</html>
