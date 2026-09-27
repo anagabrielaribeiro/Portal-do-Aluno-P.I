@@ -289,7 +289,3 @@ def verificar_2fa_view(request):
 def logout_view(request):
     logout(request) # encerra a sessão
     return redirect('login') # depois de sair volta para o login
-
-
-def login_view(request):
-    return render(request, 'autenticacao/login.html')

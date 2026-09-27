@@ -183,6 +183,8 @@ EMAIL_HOST_USER = 'portalalunopi@gmail.com'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
 
+# le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
+CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
 
 
 # Configuração de Logs de Auditoria
