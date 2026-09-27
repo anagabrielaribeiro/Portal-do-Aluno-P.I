@@ -8,7 +8,6 @@ import pyotp
 import qrcode
 import io
 import base64
-
 from .models import Usuario, LogAuditoria
 
 
@@ -135,7 +134,7 @@ def login_view(request):
                 acao=LogAuditoria.Acao.LOGIN_FALHO,
                 risco=LogAuditoria.Risco.BAIXO,
                 ip_origem=obter_ip(request),
-                detalhes=f"Tentativa de login com usuário inexistente: {username}"
+                detalhes=f"Tentativa de login com usuário inexistente: {email}"
             )
         messages.error(
             request,
@@ -419,36 +418,3 @@ def logout_view(request):
     return redirect('login')
 
 
-# PAINEL DE AUDITORIA (Segurança & LGPD)
-from django.contrib.admin.views.decorators import staff_member_required
-from types import SimpleNamespace
-
-@staff_member_required
-def painel_auditoria_view(request):
-    # logs de falha/2fa (Ana - 5.2)
-    falhas = list(LogAuditoria.objects.select_related('usuario').all())
-
-    # logs de sucesso (Vitoria - 5.1)
-    sucessos = LogAutenticacao.objects.select_related('usuario').all()
-    sucessos_normalizados = [
-        SimpleNamespace(
-            data_hora=log.data_hora,
-            usuario=log.usuario,
-            ip_origem=log.ip,
-            detalhes=f"Login bem-sucedido (RA: {log.ra_registrado})" if log.ra_registrado else "Login bem-sucedido.",
-            risco='baixo',
-            get_risco_display=lambda: 'Baixo',
-            get_acao_display=lambda: 'Login com Sucesso',
-        )
-        for log in sucessos
-    ]
-
-    # junta as duas listas e ordena por data, mais recente primeiro
-    logs = sorted(
-        falhas + sucessos_normalizados,
-        key=lambda log: log.data_hora,
-        reverse=True
-    )
-
-    context = {'logs': logs}
-    return render(request, 'autenticacao/auditoria.html', context)
