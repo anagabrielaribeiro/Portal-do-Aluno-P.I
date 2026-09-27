@@ -38,11 +38,11 @@ def obter_ip(request):
 def login_view(request):
     # Verifica se o formulário de login foi enviado.
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')
         senha = request.POST.get('password')
-        # Procura o usuário pelo nome de usuário.
+        # Procura o usuário pelo email.
         try:
-            usuario = Usuario.objects.get(username=username)
+            usuario = Usuario.objects.get(email=email)
         except Usuario.DoesNotExist:
             usuario = None
         # Verifica se a conta está temporariamente bloqueada.
@@ -59,7 +59,7 @@ def login_view(request):
         # Verifica usuário e senha.
         usuario_autenticado = authenticate(
             request,
-            username=username,
+            username=email,
             password=senha
         )
 
@@ -152,12 +152,12 @@ def login_view(request):
 def login_colaborador_view(request):
 
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')
         senha = request.POST.get('password')
 
         # procura o usuario pelo nome do usuario
         try:
-            usuario = Usuario.objects.get(username=username)
+            usuario = Usuario.objects.get(email=email)
         except Usuario.DoesNotExist:
             usuario = None
 
@@ -173,7 +173,7 @@ def login_colaborador_view(request):
         # verifica usuario e senha
         usuario_autenticado = authenticate(
             request,
-            username=username,
+            username=email,
             password=senha
         )
 
@@ -307,7 +307,7 @@ def ativar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('painel_auditoria')
+                return redirect('/admin/')
             
             return redirect('dashboard')
         else:
@@ -378,7 +378,7 @@ def verificar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('painel_auditoria')
+                return redirect('/admin/')
 
             return redirect('dashboard')
         else:
