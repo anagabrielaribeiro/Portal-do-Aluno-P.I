@@ -63,6 +63,10 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'autenticacao.Usuario'
 
+AUTHENTICATION_BACKENDS = [
+    'autenticacao.backends.EmailBackend',
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -183,6 +187,8 @@ EMAIL_HOST_USER = 'portalalunopi@gmail.com'
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
 
+# le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
+CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
 
 
 # Configuração de Logs de Auditoria
@@ -218,3 +224,13 @@ PASSWORD_RESET_TIMEOUT = 3600
 
 MEDIA_URL = '/media/' # prefixo de URL usado pra acessar os arquivos enviados, tipo os boletos
 MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam salvos
+
+SECURE_SSL_REDIRECT = not DEBUG # fora do modo de desenvolvimento, obriga o site a usar HTTPS
+SESSION_COOKIE_SECURE = not DEBUG # impede que o cookie de sessão tipo login seja enviado por uma conexão não segura
+CSRF_COOKIE_SECURE = not DEBUG # impede que o cookie de proteção contra CSRF seja enviado por uma conexão não segura
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') # Avisa o Django que a conexão veio segura, mesmo passando pelo Vercel antes
+
+
+SECURE_HSTS_SECONDS = 3600 # tempo em segundos que o navegador vai lembrar de só usar HTTPS 
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True # também pra subdomínios 
+SECURE_HSTS_PRELOAD = True # permite que o site seja incluído numa lista pública de sites que só aceitam HTTPS

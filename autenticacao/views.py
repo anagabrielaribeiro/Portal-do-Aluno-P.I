@@ -8,7 +8,6 @@ import pyotp
 import qrcode
 import io
 import base64
-
 from .models import Usuario, LogAuditoria
 
 
@@ -38,11 +37,11 @@ def obter_ip(request):
 def login_view(request):
     # Verifica se o formulário de login foi enviado.
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')
         senha = request.POST.get('password')
-        # Procura o usuário pelo nome de usuário.
+        # Procura o usuário pelo email.
         try:
-            usuario = Usuario.objects.get(username=username)
+            usuario = Usuario.objects.get(email=email)
         except Usuario.DoesNotExist:
             usuario = None
         # Verifica se a conta está temporariamente bloqueada.
@@ -59,7 +58,7 @@ def login_view(request):
         # Verifica usuário e senha.
         usuario_autenticado = authenticate(
             request,
-            username=username,
+            username=email,
             password=senha
         )
 
@@ -135,7 +134,7 @@ def login_view(request):
                 acao=LogAuditoria.Acao.LOGIN_FALHO,
                 risco=LogAuditoria.Risco.BAIXO,
                 ip_origem=obter_ip(request),
-                detalhes=f"Tentativa de login com usuário inexistente: {username}"
+                detalhes=f"Tentativa de login com usuário inexistente: {email}"
             )
         messages.error(
             request,
@@ -152,12 +151,12 @@ def login_view(request):
 def login_colaborador_view(request):
 
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')
         senha = request.POST.get('password')
 
         # procura o usuario pelo nome do usuario
         try:
-            usuario = Usuario.objects.get(username=username)
+            usuario = Usuario.objects.get(email=email)
         except Usuario.DoesNotExist:
             usuario = None
 
@@ -173,7 +172,7 @@ def login_colaborador_view(request):
         # verifica usuario e senha
         usuario_autenticado = authenticate(
             request,
-            username=username,
+            username=email,
             password=senha
         )
 
@@ -307,7 +306,7 @@ def ativar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('painel_auditoria')
+                return redirect('/admin/')
             
             return redirect('dashboard')
         else:
@@ -378,7 +377,7 @@ def verificar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('painel_auditoria')
+                return redirect('/admin/')
 
             return redirect('dashboard')
         else:
@@ -419,36 +418,3 @@ def logout_view(request):
     return redirect('login')
 
 
-# PAINEL DE AUDITORIA (Segurança & LGPD)
-from django.contrib.admin.views.decorators import staff_member_required
-from types import SimpleNamespace
-
-@staff_member_required
-def painel_auditoria_view(request):
-    # logs de falha/2fa (Ana - 5.2)
-    falhas = list(LogAuditoria.objects.select_related('usuario').all())
-
-    # logs de sucesso (Vitoria - 5.1)
-    sucessos = LogAutenticacao.objects.select_related('usuario').all()
-    sucessos_normalizados = [
-        SimpleNamespace(
-            data_hora=log.data_hora,
-            usuario=log.usuario,
-            ip_origem=log.ip,
-            detalhes=f"Login bem-sucedido (RA: {log.ra_registrado})" if log.ra_registrado else "Login bem-sucedido.",
-            risco='baixo',
-            get_risco_display=lambda: 'Baixo',
-            get_acao_display=lambda: 'Login com Sucesso',
-        )
-        for log in sucessos
-    ]
-
-    # junta as duas listas e ordena por data, mais recente primeiro
-    logs = sorted(
-        falhas + sucessos_normalizados,
-        key=lambda log: log.data_hora,
-        reverse=True
-    )
-
-    context = {'logs': logs}
-    return render(request, 'autenticacao/auditoria.html', context)

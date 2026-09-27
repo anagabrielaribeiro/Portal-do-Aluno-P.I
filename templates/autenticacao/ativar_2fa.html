@@ -95,11 +95,11 @@
 
                 <!-- Exibe mensagens enviadas como erros ou confirmações -->
                 {% if messages %}
-                    {% with message=messages|last %}
+                    {% for message in messages %}
                         <p class="{{ message.tags }}">
                             {{ message }}
                         </p>
-                    {% endwith %}
+                    {% endfor %}
                 {% endif %}
 
                 <!-- Envia o código para o servidor -->
