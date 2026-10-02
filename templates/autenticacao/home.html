@@ -1,0 +1,105 @@
+{% load static %}
+{% with marca="Vitta Studio" %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ marca }} | Portal do Aluno</title>
+  <meta name="description" content="Portal do aluno: acompanhe sua matrícula, consulte boletos e organize suas tarefas.">
+
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+</head>
+
+<body>
+  <div class="topo-e-hero">
+    <header class="miolo topo">
+        <a class="marca" href="{% url 'home' %}">
+            <span class="marca-simbolo" aria-hidden="true">
+                <img src="{% static 'images/logo.jpeg' %}" alt="Logo Portal do Aluno">
+            </span>
+            {{ marca }}
+        </a>
+        <a class="botao botao-pequeno" href="{% url 'login' %}">Entrar</a>
+    </header>
+
+    <main class="miolo hero">
+      <div>
+        <h1>Matrícula, boletos e tarefas, sem fila.</h1>
+        <p>
+          O portal da {{ marca }} reúne o que o aluno precisa acompanhar durante
+          o semestre, em um só lugar e a qualquer hora.
+        </p>
+        <a class="botao" href="{% url 'login' %}">Entrar no portal do aluno</a>
+        <p class="nota">Acesso exclusivo para alunos matriculados.</p>
+      </div>
+
+      {# carteirinha só decorativa, com dados fictícios #}
+      <div class="carteirinha-area" aria-hidden="true">
+        <div class="carteirinha">
+          <div class="carteirinha-faixa">{{ marca }}</div>
+          <div class="carteirinha-corpo">
+            <div class="carteirinha-foto">NA</div>
+            <div class="carteirinha-dados">
+              <strong>Nome do Aluno</strong>
+              <span>RA 00000000</span>
+            </div>
+          </div>
+          <div class="carteirinha-codigo"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <section>
+    <div class="miolo">
+      <h2>O que você resolve pelo portal</h2>
+      <ul class="recursos">
+        <li>
+          <h3>Matrículas</h3>
+          <p>Veja em quais disciplinas você está matriculado.</p>
+        </li>
+        <li>
+          <h3>Boletos</h3>
+          <p>Consulte os boletos e as datas de vencimento.</p>
+        </li>
+        <li>
+          <h3>Tarefas</h3>
+          <p>Anote o que precisa entregar e marque o que já fez.</p>
+        </li>
+        <li>
+          <h3>Seus dados</h3>
+          <p>Confira o seu cadastro e os consentimentos que você deu.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sobre">
+    <div class="miolo">
+      <h2>Sobre a {{ marca }}</h2>
+      <p>
+        A {{ marca }} é uma plataforma de autoatendimento acadêmico criada como
+        Projeto Integrador. A ideia é simples: o aluno resolve pelo celular ou
+        pelo computador o que antes dependia de ir até a secretaria.
+      </p>
+    </div>
+  </section>
+
+  <section class="chamada">
+    <div class="miolo">
+      <h2>Pronto para acessar?</h2>
+      <a class="botao" href="{% url 'login' %}">Entrar no portal do aluno</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="miolo rodape">
+      <span>{{ marca }} · Projeto Integrador</span>
+      <a href="{% url 'login_colaborador' %}">Acesso da gestão</a>
+    </div>
+  </footer>
+</body>
+</html>
+{% endwith %}

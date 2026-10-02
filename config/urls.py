@@ -21,7 +21,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls), # tela administrativa que a instituição usa
+    path('gestao-portal/', admin.site.urls), # tela administrativa que a instituição usa
     path('', include('autenticacao.urls')), #
     path('', include('recuperacao_senha.urls')),
     path('alunos/', include('alunos.urls')),
