@@ -17,6 +17,9 @@ limite_tentativas = 5
 # Tempo de bloqueio da conta, em minutos.
 tempo_bloqueio = 15
 
+def home_view(request):
+    return render(request, 'autenticacao/home.html')  # o caminho do seu template
+
 
 def obter_ip(request):
     """
@@ -306,7 +309,7 @@ def ativar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('/admin/')
+                return redirect('/gestao-portal/')
             
             return redirect('dashboard')
         else:
@@ -377,7 +380,7 @@ def verificar_2fa_view(request):
 
             # se o login veio da tela do colaborador manda pro admin
             if request.session.pop('tipo_login', None) == 'colaborador':
-                return redirect('/admin/')
+                return redirect('/gestao-portal/')
 
             return redirect('dashboard')
         else:
