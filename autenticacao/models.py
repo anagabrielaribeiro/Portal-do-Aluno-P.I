@@ -66,7 +66,7 @@ class Usuario(AbstractUser):
         return self.username
 
     class Meta:
-        db_table = 'autenticacao_usuario'
+        db_table = 'auth_user'
 
 
 class LogAuditoria(models.Model):
