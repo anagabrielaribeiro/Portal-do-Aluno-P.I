@@ -195,7 +195,7 @@ DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
 CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
 
 
-# Configuração de Logs de Auditoria
+# Configuração de Logs de Auditoria (Seguro para Servidores em Nuvem / Vercel)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -206,16 +206,15 @@ LOGGING = {
         },
     },
     'handlers': {
-        'arquivo': {
+        'console': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'auditoria.log',
+            'class': 'logging.StreamHandler',
             'formatter': 'auditoria_format',
         },
     },
     'loggers': {
         'recuperacao_senha': {
-            'handlers': ['arquivo'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
