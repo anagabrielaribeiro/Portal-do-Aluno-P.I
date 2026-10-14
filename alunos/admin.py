@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Aluno
+
 # ferramente interna da instituição usa pra criar, editar e gerecianr dados
 
 # classe que configura como o Aluno aparece dentro do admin

@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from .fields import CampoCriptografado
+from django.core.validators import MaxLengthValidator
 
 class Aluno(models.Model):
     """
@@ -25,14 +26,15 @@ class Aluno(models.Model):
         help_text='Conta de login vinculada ao aluno'
     )
 
+
     nome = models.CharField(max_length=120)
     nome_social = models.CharField(max_length=120, blank=True, null=True)# nome social 
     sexo = models.CharField(max_length=10, choices=Sexo.choices) # sexo feminino, masculino ou neutro
-    cpf = CampoCriptografado(max_length=100, unique=True) # unique para que o cpf não se repita entre alunos diferentes, campo criptografado 
-    rg = CampoCriptografado(max_length=100) #campo criptografado
+    cpf = CampoCriptografado(max_length=255, unique=True, validators=[MaxLengthValidator(14)])
+    rg = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)]) 
     data_nascimento = models.DateField()
-    telefone = models.CharField(max_length=20)
-    endereco = CampoCriptografado(max_length=400) #campo criptografado
+    telefone = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)])
+    endereco = CampoCriptografado(max_length=2000, validators=[MaxLengthValidator(255)])
     ra = models.CharField(max_length= 20, unique= True, blank=True, help_text='Registro academico')
     data_ultima_alteracao_contato = models.DateTimeField(null=True, blank=True) # guarda quando foi a ultima vez que telefone/endereço foram alterados
     dados_anonimizados = models.BooleanField(default=False) # marca se os dados doaluno já foram anonimizados por pedido de exclusão
