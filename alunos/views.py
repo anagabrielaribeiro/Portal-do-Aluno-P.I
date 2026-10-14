@@ -3,6 +3,9 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from .models import Aluno
 from .forms import AlunoContatoForm
+from django.views.decorators.cache import never_cache
+
+@never_cache #impede que o navegador guarde a pagina de cache
 
 # se não estiver logado redireciona para a tela Login
 @login_required
@@ -13,9 +16,11 @@ def dados_pessoais(request):
     # tenta buscar o objeto Aluno relacionado ao usuário que está logado 
     try:
         aluno = request.user.aluno 
-    except Aluno.DoesNotExist: # caso o usuário esteja logado mas nã tenha cadastro mostra a mensagem
+    except Aluno.DoesNotExist:
+        if request.user.is_staff:
+            return redirect('/gestao-portal/')
         messages.error(request, 'Não encontramos um cadastro de aluno vinculado a essa conta.')
-        return redirect('dashboard') # ajustar
+        return redirect('login') 
 
 
 
@@ -28,15 +33,40 @@ def dados_pessoais(request):
     historico_notas = []
     historico_financeiro = []
 
-    # trata o envio do formulario de telefone e endereco, a página ve pra ca quando o aluo clica em salvar
+    
     if request.method == 'POST': 
+
+        if not aluno.pode_editar_contato:
+            proxima = timezone.localtime(aluno.proxima_edicao_disponivel)
+            messages.error(
+                request,
+                f'você pode editar de novo em {proxima:%d/%m/%Y as %H:%M}.',
+            )
+            return redirect('dados_pessoais')
+
+        original = (aluno.telefone, aluno.endereco) # guarda valores antes de mexer
+
         form = AlunoContatoForm(request.POST, instance=aluno) # request.Post tem os dados digitados e o instance=aluno não deixa criar um aluno novo e sim atualizar
         if form.is_valid(): # is_valid() roda as validaões do form/model como campo origatório
-            form.save() # salva no bd
-            messages.success(request, 'Dados de contato atualizados com sucesso.')
-            return redirect('dados_pessoais')# redireciona de volta pra mesma pagina 
-    else:
-        form = AlunoContatoForm(instance=aluno)
+            
+            novo = (form.cleaned_data['telefone'], form.cleaned_data['endereco']) 
+
+            if novo != original: # se mudou algo
+                aluno = form.save(commit=False)
+                aluno.data_ultima_alteracao_contato = ( timezone.now())
+                aluno.save(
+                    update_fields=[
+                        'telefone',
+                        'endereco',
+                        'data_ultima_alteracao_contato'
+                    ]
+                )
+                messages.success(request, 'Dados de contato atualizados com sucesso.')
+            else: 
+                messages.info(request, 'Nenhum dado foi alterado')
+            return redirect('dados_pessoais')
+        else: 
+            form = AlunoContatoForm(instance=aluno)
 
     # dados que serão enviado para o html
     context = {
