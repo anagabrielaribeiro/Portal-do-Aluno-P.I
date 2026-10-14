@@ -200,9 +200,10 @@
                 </ul>
             </nav>
 
-            <a href="{% url 'logout' %}" class="sidebar-sair">
-                Sair
-            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="sidebar-sair">Sair</button>
+            </form>
         </aside>
 
         <main class="conteudo">

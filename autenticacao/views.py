@@ -211,7 +211,14 @@ def login_view(request):
         # não autentifica ip com muitas falhas
         if ip_bloqueado(obter_ip(request)):
             messages.error(request, MSG_LOGIN)
-            return render(request, 'autenticacao/login.html')
+            return redirect('login')
+
+        # Verifica usuário e senha.
+        usuario_autenticado = authenticate(
+            request,
+            username=email,
+            password=senha
+        )
 
 
         usuario = Usuario.objects.filter(email=email).first()
@@ -222,17 +229,9 @@ def login_view(request):
         # Verifica se a conta está temporariamente bloqueada.
         if usuario and usuario.esta_bloqueado():
             messages.error(request, MSG_LOGIN)
-            return render(
-                request,
-                'autenticacao/login.html'
-            )
+            return redirect('login')
         
-        # Verifica usuário e senha.
-        usuario_autenticado = authenticate(
-            request,
-            username=email,
-            password=senha
-        )
+        
 
 
         # SENHA CORRETA
@@ -255,6 +254,7 @@ def login_view(request):
     # 
         registrar_falha(request, usuario, LogAuditoria.Acao.LOGIN_FALHO, 'tentativa Falha')
         messages.error(request, MSG_LOGIN)
+        return redirect('login')
 
     # Exibe o formulário de login.
     return render(
@@ -274,6 +274,13 @@ def login_colaborador_view(request):
             messages.error(request, MSG_LOGIN)
             return render(request, 'autenticacao/login_colaborador.html')
 
+        # verifica usuario e senha
+        usuario_autenticado = authenticate(
+            request,
+            username=email,
+            password=senha
+        )
+
         usuario = Usuario.objects.filter(email=email).first()
         if usuario:
             liberar_bloqueio_expirado(usuario)
@@ -282,14 +289,9 @@ def login_colaborador_view(request):
         # verifica se a conta está temporariamente bloqueada
         if usuario and usuario.esta_bloqueado():
             messages.error(request, MSG_LOGIN)
-            return render(request, 'autenticacao/login_colaborador.html')
+            return redirect('login_colaborador')
 
-        # verifica usuario e senha
-        usuario_autenticado = authenticate(
-            request,
-            username=email,
-            password=senha
-        )
+        
 
 
         # so passa se autenticou e tem perfil de colaborador vinculado
@@ -309,11 +311,7 @@ def login_colaborador_view(request):
 
         registrar_falha(request, usuario, LogAuditoria.Acao.LOGIN_FALHO, 'Tentativa falha')
         messages.error(request, MSG_LOGIN)
-
-        return render(
-            request,
-            'autenticacao/login_colaborador.html'
-        )
+        return redirect('login_colaborador')
 
     return render(
         request,
