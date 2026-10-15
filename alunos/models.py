@@ -33,7 +33,8 @@ class Aluno(models.Model):
     nome = models.CharField(max_length=120)
     nome_social = models.CharField(max_length=120, blank=True, null=True)# nome social 
     sexo = models.CharField(max_length=10, choices=Sexo.choices) # sexo feminino, masculino ou neutro
-    cpf = CampoCriptografado(max_length=255, unique=True, validators=[MaxLengthValidator(14)])
+    cpf = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(14)])
+    cpf_hash = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
     rg = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)]) 
     data_nascimento = models.DateField()
     telefone = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)])
@@ -45,24 +46,39 @@ class Aluno(models.Model):
     def __str__(self):
         return self.nome
 
-    def clean_fields(self, exclude=None):
-        super().clean()
+    # gera um identificador secreto do cpf
+    def gerar_hash_cpf(cpf):
+        chave = settings.CHAVE_HASH_CPF
+        if not chave:
+            raise Exception('Defina a CHAVE_HASH_CPF no .env e na vercel')
+        numeros = cpf.replace('.','').replace('-','') # só os numeros
+        return hmac.new(chave.encode(), numeros.encode(), hashlib.sha256).hexdigest()
 
-        if self.dados_anonimizados: # aluno anonimizado não valida
-            return
+
+    def clean_fields(self, exclude=None):
+        exclude = exclude or []
         erros = {}
 
-        if self.cpf: 
-            try:
-                validar_cpf(self.cpf)
-            except ValidationError as e:
-                erros['cpf'] = e
+        
+        try:
+            super().clean_fields(exclude=exclude)
+        except ValidationError as e:
+            erros = e.update_error_dict(erros)
 
-        if self.data_nascimento:
-            try:
-                validar_data_nascimento(self.data_nascimento)
-            except ValidationError as e:
-                erros['data_nascimento'] = e
+        # aluno anonimizado não valida
+        if not self.dados_anonimizados:
+
+            if 'cpf' not in exclude and 'cpf' not in erros and self.cpf:
+                try:
+                    validar_cpf(self.cpf)
+                except ValidationError as e:
+                    erros['cpf'] = e.error_list
+
+            if 'data_nascimento' not in exclude and 'data_nascimento' not in erros and self.data_nascimento:
+                try:
+                    validar_data_nascimento(self.data_nascimento)
+                except ValidationError as e:
+                    erros['data_nascimento'] = e.error_list
 
         if erros:
             raise ValidationError(erros)
@@ -77,6 +93,8 @@ class Aluno(models.Model):
 
     # só gera o ra automaticamente se ainda não tiver definido 
     def save(self, *args, **kwargs):
+        if kwargs.get('update_fields') is None and not self.dados_anonimizados:
+            self.cpf_hash = gerar_hash_cpf(self.cpf)
         if not self.ra:
             self.ra = self.gerar_ra()
         super().save(*args, **kwargs)

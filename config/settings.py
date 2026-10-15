@@ -206,7 +206,7 @@ DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
 
 # le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
 CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
-
+CHAVE_HASH_CPF = os.environ.get('CHAVE_HASH_CPF') 
 
 # Configuração de Logs de Auditoria (Seguro para Servidores em Nuvem / Vercel)
 LOGGING = {
