@@ -215,7 +215,8 @@ def login_view(request):
         senha = request.POST.get('password')
 
         # não autentifica ip com muitas falhas
-        if ip_bloqueado(obter_ip(request)):
+        ip = obter_ip(request)
+        if ip_bloqueado(ip):
             messages.error(request, MSG_LOGIN)
             return redirect('login')
 
@@ -277,7 +278,8 @@ def login_colaborador_view(request):
         email = request.POST.get('username')
         senha = request.POST.get('password')
 
-        if ip_bloqueado(obter_ip(request)):
+        ip = obter_ip(request)
+        if ip_bloqueado(ip):
             messages.error(request, MSG_LOGIN)
             return render(request, 'autenticacao/login_colaborador.html')
 
