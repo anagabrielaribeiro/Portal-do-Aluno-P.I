@@ -4,13 +4,10 @@ from django.shortcuts import render, redirect
 from .models import Aluno
 from .forms import AlunoContatoForm
 from django.views.decorators.cache import never_cache
+from django.utils import timezone 
 
 @never_cache #impede que o navegador guarde a pagina de cache
-
-# se não estiver logado redireciona para a tela Login
-@login_required
-
-# cria uma função para mostraros dados pessoais do aluno
+@login_required # se não estiver logado redireciona para a tela Login
 def dados_pessoais(request):
 
     # tenta buscar o objeto Aluno relacionado ao usuário que está logado 
@@ -65,8 +62,8 @@ def dados_pessoais(request):
             else: 
                 messages.info(request, 'Nenhum dado foi alterado')
             return redirect('dados_pessoais')
-        else: 
-            form = AlunoContatoForm(instance=aluno)
+    else: 
+        form = AlunoContatoForm(instance=aluno)
 
     # dados que serão enviado para o html
     context = {
