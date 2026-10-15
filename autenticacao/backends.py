@@ -19,7 +19,7 @@ class EmailBackend(ModelBackend):
 
 
         # Pega o único usuário encontrado na lista
-        usuario = usuario[0]
+        usuario = usuarios[0]
 
         # confere se a senha digitada bate com o hash salvo no banco, e se conta é ativa
         if usuario.check_password(password) and usuario.is_active:
