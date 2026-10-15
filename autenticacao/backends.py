@@ -17,6 +17,8 @@ class EmailBackend(ModelBackend):
         if len(usuarios) != 1:
             return None
 
+        usuario = usuario.first()
+
         # confere se a senha digitada bate com o hash salvo no banco, e se conta é ativa
         if usuario.check_password(password) and usuario.is_active:
             return usuario  

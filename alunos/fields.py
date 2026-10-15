@@ -1,10 +1,13 @@
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet 
 from django.conf import settings
 from django.db import models
 
-# cria o cifrador usando a chave secreta guardada 
-fernet = Fernet(settings.CHAVE_CRIPTOGRAFIA)
 
+if not settings.CHAVE_CRIPTOGRAFIA:
+    raise ImproperlyConfigured('Defina a variável de ambiente CHAVE_CRIPTOGRAFIA')
+
+# Usa apenas uma chave única para cifrar e decifrar
+fernet = Fernet(settings.CHAVE_CRIPTOGRAFIA)
 class CampoCriptografado(models.CharField):
     # campo de texto que cifra antes de salvar e decifra depois de ler
 

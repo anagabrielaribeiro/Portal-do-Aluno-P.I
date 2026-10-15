@@ -1,7 +1,8 @@
 import logging
 from django.shortcuts import render
 from django.contrib.auth import views as auth_views
-
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 # Chama o logger configurado no settings.py
 logger = logging.getLogger('recuperacao_senha')
 
@@ -10,6 +11,7 @@ logger = logging.getLogger('recuperacao_senha')
 # O Django já sabe para onde redirecionar sozinho, porque ele procura automaticamente pelas urls de nome 
 # 'password_reset_done' e 'password_reset_complete' 
 
+@method_decorator(never_cache, name='dispatch')
 class RecuperarSenhaView(auth_views.PasswordResetView):
     # mostra o forms pedindo o e-mail e dispara o link de recuperação. 
     # o django já gera o token seguro (com o secret_key) e checa se existe algum usuario com o e-mail
@@ -21,13 +23,13 @@ class RecuperarSenhaView(auth_views.PasswordResetView):
         logger.info(f"TENTATIVA: Solicitação de recuperação de senha enviada para o e-mail: {email}")
         return super().form_valid(form)
 
-
+@method_decorator(never_cache, name='dispatch')
 class RecuperarSenhaEnviadaView(auth_views.PasswordResetDoneView):
     # mostra essa tela depois que o forms e envado
     # aparece igual mesmo se o e-mail não existir no sistema
     template_name = 'recuperacao_senha/password_reset_done.html'
 
-
+@method_decorator(never_cache, name='dispatch')
 class ConfirmarNovaSenhaView(auth_views.PasswordResetConfirmView):
     # essa tela acesso pelo link do e-mail, mas antes mostra o forms de nova senha
     #  e o django verifica se o token é valido ainda
@@ -37,7 +39,7 @@ class ConfirmarNovaSenhaView(auth_views.PasswordResetConfirmView):
         logger.info("SUCESSO: Senha redefinida e validada com sucesso pelo token de acesso.")
         return super().form_valid(form)
 
-
+@method_decorator(never_cache, name='dispatch')
 class RecuperacaoConcluidaView(auth_views.PasswordResetCompleteView):
     # essa é a tela final, mostra depois que a senha nova já foi salva no banco
     template_name = 'recuperacao_senha/password_reset_complete.html'

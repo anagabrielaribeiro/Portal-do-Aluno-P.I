@@ -36,7 +36,12 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS dinâmico que lê da variável de ambiente quando existir
+# caso contrário, usa o padrão seguro com .vercel.app, localhost e 127.0.0.1
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('ALLOWED_HOSTS', '.vercel.app,localhost,127.0.0.1').split(',')
+]
 
 
 # Application definition
@@ -64,6 +69,15 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'autenticacao.Usuario'
 LOGIN_URL = 'login' 
+
+# Contador de falhas por IP guardado no banco (Neon), e não na memória de cada instância da Vercel
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_limite_login',  # nome da tabela
+        'TIMEOUT': 900,                    # 15 minutos (15 * 60 segundos)
+    }
+}
 
 AUTHENTICATION_BACKENDS = [
     'autenticacao.backends.EmailBackend',

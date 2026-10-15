@@ -5,6 +5,8 @@ from .models import Aluno
 from .forms import AlunoContatoForm
 from django.views.decorators.cache import never_cache
 from django.utils import timezone 
+from autenticacao.models import LogAuditoria
+from autenticacao.views import obter_ip
 
 @never_cache #impede que o navegador guarde a pagina de cache
 @login_required # se não estiver logado redireciona para a tela Login
@@ -59,6 +61,14 @@ def dados_pessoais(request):
                     ]
                 )
                 messages.success(request, 'Dados de contato atualizados com sucesso.')
+
+                LogAuditoria.objects.create(
+                    usuario=request.user,
+                    acao= LogAuditoria.Acao.CONTATO_ALTERADO,
+                    risco= LogAuditoria.Risco.BAIXO,
+                    ip_origem= obter_ip(request),
+                    detalhes= 'Telefone e/ou endereços alterados',
+                )
             else: 
                 messages.info(request, 'Nenhum dado foi alterado')
             return redirect('dados_pessoais')

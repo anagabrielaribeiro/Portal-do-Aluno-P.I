@@ -1,12 +1,24 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date
 from .fields import CampoCriptografado
 from django.core.validators import MaxLengthValidator
 from django.core.exceptions import ValidationError          
 from .validators import validar_cpf, validar_data_nascimento
 import secrets
+import hashlib
+import hmac
+
+
+    # gera um identificador secreto do cpf
+def gerar_hash_cpf(cpf):
+    chave = settings.CHAVE_HASH_CPF
+    if not chave:
+        raise Exception('Defina a CHAVE_HASH_CPF no .env e na vercel')
+    numeros = cpf.replace('.','').replace('-','') # só os numeros
+    return hmac.new(chave.encode(), numeros.encode(), hashlib.sha256).hexdigest()
+
 
 class Aluno(models.Model):
     """
@@ -18,13 +30,14 @@ class Aluno(models.Model):
     # define as opções de sexo
     class Sexo(models.TextChoices):
         FEMININO = 'feminino', 'Feminino'
-        MASCULINO = 'masculino', 'Maculino'
+        MASCULINO = 'masculino', 'Masculino'
         NEUTRO = 'neutro', 'Neutro'
+
 
 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
-        on_delete = models.CASCADE, # Cascade serve para se caso apagar o usuário, apaga o aluno tambem.
+        on_delete = models.PROTECT, 
         related_name='aluno', 
         help_text='Conta de login vinculada ao aluno'
     )
@@ -46,13 +59,28 @@ class Aluno(models.Model):
     def __str__(self):
         return self.nome
 
-    # gera um identificador secreto do cpf
-    def gerar_hash_cpf(cpf):
-        chave = settings.CHAVE_HASH_CPF
-        if not chave:
-            raise Exception('Defina a CHAVE_HASH_CPF no .env e na vercel')
-        numeros = cpf.replace('.','').replace('-','') # só os numeros
-        return hmac.new(chave.encode(), numeros.encode(), hashlib.sha256).hexdigest()
+    # função para anonimizar os dados por completo
+    def anonimizar(self):
+        with transaction.atomic() : # ou faz tudo ou não faz nada  
+            self.nome = 'Aluno anonimizado'
+            self.nome_social = None
+            self.cpf = '***.***.***-**'
+            self.cpf_hash = None # zera a assinatura do cpf
+            self.rg = '***'
+            self.telefone = "***"
+            self.endereco = "***"
+            self.data_nascimento = date(1900,1,1)
+            self.ra = f'ANON{self.pk:06d}'
+            self.dados_anonimizados = True
+            self.save()
+
+            usuario = self.usuario
+            usuario.email = ''
+            usuario.username = f'anonimo{self.pk}'
+            usuario.is_active = False
+            usuario.chave_2fa = None
+            usuario.autentificacao_dois_fatores = False
+            usuario.save()
 
 
     def clean_fields(self, exclude=None):
@@ -88,7 +116,7 @@ class Aluno(models.Model):
     def gerar_ra(self):
         ano = timezone.now().year
         while True:
-            ra = f'{ano}{secrets.randbelow:06d}'
+            ra = f'{ano}{secrets.randbelow(1000000):06d}'
             if not Aluno.objects.filter(ra=ra).exists():
                 return ra
 
