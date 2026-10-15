@@ -30,13 +30,11 @@ limite_tentativas_ip= 20
 prazo_2fa = 5 
 
 MSG_LOGIN = 'Usuário ou senha incorretos. Se errou várias vezes, aguarde alguns minutos.'
-@never_cache
 def home_view(request):
     return render(request, 'autenticacao/home.html')  # o caminho do seu template
 
 
 # usa o ultimo valor que a hospedagem adiciona 
-@never_cache
 def obter_ip(request):
 
     xff = request.META.get('HTTP_X_FORWARDED_FOR')
