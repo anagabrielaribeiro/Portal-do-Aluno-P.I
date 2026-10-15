@@ -4,6 +4,9 @@ from django.utils import timezone
 from datetime import timedelta
 from .fields import CampoCriptografado
 from django.core.validators import MaxLengthValidator
+from django.core.exceptions import ValidationError          
+from .validators import validar_cpf, validar_data_nascimento
+
 
 class Aluno(models.Model):
     """
@@ -41,6 +44,29 @@ class Aluno(models.Model):
 
     def __str__(self):
         return self.nome
+
+    def clean_fields(self, exclude=None):
+        super().clean()
+
+        if self.dados_anonimizados: # aluno anonimizado não valida
+            return
+        erros = {}
+
+        if self.cpf: 
+            try:
+                validar_cpf(self.cpf)
+            except ValidationError as e:
+                erros['cpf'] = e
+
+        if self.data_nascimento:
+            try:
+                validar_data_nascimento(self.data_nascimento)
+            except ValidationError as e:
+                erros['data_nascimento'] = e
+
+        if erros:
+            raise ValidationError(erros)
+
 
     # função para gerar o ra com data de nascimento e final do cpf
     def gerar_ra(self):
