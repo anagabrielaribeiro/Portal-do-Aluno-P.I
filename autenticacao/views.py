@@ -221,7 +221,7 @@ def login_view(request):
         )
 
 
-        usuario = Usuario.objects.filter(email=email).first()
+        usuario = Usuario.objects.filter(email__iexact=email).first()
         if usuario: 
             liberar_bloqueio_expirado(usuario)
 
@@ -281,7 +281,7 @@ def login_colaborador_view(request):
             password=senha
         )
 
-        usuario = Usuario.objects.filter(email=email).first()
+        usuario = Usuario.objects.filter(email__iexact=email).first()
         if usuario:
             liberar_bloqueio_expirado(usuario)
 

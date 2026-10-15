@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'autenticacao.Usuario'
+LOGIN_URL = 'login' 
 
 AUTHENTICATION_BACKENDS = [
     'autenticacao.backends.EmailBackend',

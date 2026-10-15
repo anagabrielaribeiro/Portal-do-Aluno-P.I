@@ -6,7 +6,7 @@ from .fields import CampoCriptografado
 from django.core.validators import MaxLengthValidator
 from django.core.exceptions import ValidationError          
 from .validators import validar_cpf, validar_data_nascimento
-
+import secrets
 
 class Aluno(models.Model):
     """
@@ -84,12 +84,13 @@ class Aluno(models.Model):
             raise ValidationError(erros)
 
 
-    # função para gerar o ra com data de nascimento e final do cpf
+    # função para gerar o ra com ano e mais 6 digitos aleatórios
     def gerar_ra(self):
-        data_str = self.data_nascimento.strftime('%d%m%Y') # junta dia, mês e ano sem separador
-        cpf_numeros = self.cpf.replace('.','').replace('-','') 
-        sufixo_cpf = cpf_numeros[-3:]
-        return f'{data_str}{sufixo_cpf}'
+        ano = timezone.now().year
+        while True:
+            ra = f'{ano}{secrets.randbelow:06d}'
+            if not Aluno.objects.filter(ra=ra).exists():
+                return ra
 
     # só gera o ra automaticamente se ainda não tiver definido 
     def save(self, *args, **kwargs):
