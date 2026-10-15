@@ -62,12 +62,17 @@ class Aluno(models.Model):
     def cpf_mascarado(self):
         numeros = self.cpf.replace('.', '').replace('-', '') # remove o ponto e hífen do cpf
         if len(numeros) != 11:
-            return self.cpf
-        return f"***.{numeros[3:6]}.{numeros[6:9]}-**"  # esconde os 3 primeiros numeros e os 2 ultimos
+            return '***.***.***-**'
+        incio = numeros[:3]
+        fim = numeros[-2:]
+        return f'{incio}.***.***-{fim}'
+
 
     @property 
     def rg_mascarado(self):
-        valor = self.rg # esconde tudo, exceto os 3 ultimos caracteres
+        if not self.rg:
+            return 'Não informado'
+        valor = self.rg.strip()
         if len(valor) <= 3:
             return valor
         visiveis = valor[-3:]
