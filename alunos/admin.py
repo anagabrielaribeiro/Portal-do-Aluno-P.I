@@ -43,7 +43,7 @@ class AlunoAdmin(admin.ModelAdmin):
         
         # anonimiza um aluno por vez
         if queryset.count() != 1:
-            self.massage_user(request, 'Selecione apenas um aluno por vez', messages.ERROR)
+            self.message_user(request, 'Selecione apenas um aluno por vez', messages.ERROR)
             return
 
         aluno = queryset.first()
@@ -61,4 +61,6 @@ class AlunoAdmin(admin.ModelAdmin):
             detalhes= f'Aluno id {aluno.pk} anonimizado'
         )
 
-        self;message_user(request, 'Aluno anonimizado com sucesso', message.SUCCESS)
+        self;message_user(request, 'Aluno anonimizado com sucesso', messages.SUCCESS)
+
+admin.site.register(Aluno, AlunoAdmin)
