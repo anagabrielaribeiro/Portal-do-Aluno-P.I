@@ -5,11 +5,11 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
-
+from django.views.decorators.cache import never_cache
 from .models import Consentimento
 from .mapeamento import DADOS_PESSOAIS
 
-
+@never_cache
 @login_required
 def meus_consentimentos(request):
     # pega só os consentimentos do aluno logado
@@ -31,6 +31,7 @@ def meus_consentimentos(request):
 
 
 # cria um consentimento pra cada finalidade quando o aluno clica "li e concordo"
+@never_cache
 @login_required
 @require_POST
 def aceitar_termos(request):
@@ -46,7 +47,7 @@ def aceitar_termos(request):
     # depois de criar tudo, volta pra tela de consentimentos
     return redirect('meus_consentimentos')
 
-
+@never_cache
 @login_required
 @require_POST
 def revogar_consentimento(request, consentimento_id):
@@ -56,7 +57,7 @@ def revogar_consentimento(request, consentimento_id):
     consentimento.revogar()# chama o método que já criamos no model, que marca a data de revogação
     return redirect('meus_consentimentos') # depois de revogar, volta pra mesma página atualizada
 
-
+@never_cache
 @login_required
 def exportar_dados_json(request):
     aluno = request.user.aluno
@@ -98,6 +99,7 @@ def exportar_dados_json(request):
     
     return response
 
+@never_cache
 @login_required
 @require_POST
 def solicitar_exclusao(request):

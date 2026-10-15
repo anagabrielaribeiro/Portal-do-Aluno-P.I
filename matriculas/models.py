@@ -85,5 +85,5 @@ class Matricula(models.Model):
     @property
     def codigo(self):
         ano = self.periodo_letivo.split('.')[0] # pega o período letivo e separa o ano 
-        sufixo = self.aluno.ra[-4:] # pega os 4 ultimos caracteres do RA
-        return f'{self.curso.sigla}-{ano}-{sufixo}' # usa a sigla do cursocomo prefixo 
+
+        return f'{self.curso.sigla}-{ano}-{self.pk or 0:05d}' # usa o número da própria matrícula

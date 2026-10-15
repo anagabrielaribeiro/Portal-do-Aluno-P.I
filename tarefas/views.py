@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tarefa
+from django.views.decorators.cache import never_cache
 
+@never_cache
 @login_required
 def lista_tarefas(request):
     aluno = request.user.aluno
@@ -13,7 +15,7 @@ def lista_tarefas(request):
     return render(request, 'tarefas/lista.html', {'tarefas': tarefas})
     # manda a lista de tarefas pro template mostrar
 
-
+@never_cache
 @login_required
 def criar_tarefa(request):
     if request.method == 'POST': # se o aluno enviou o formulario preenchido (POST)
@@ -31,7 +33,7 @@ def criar_tarefa(request):
     return render(request, 'tarefas/form.html')
     # se nao for POST, so mostra o formulario vazio pra preencher
 
-
+@never_cache
 @login_required
 def editar_tarefa(request, pk):
     tarefa = request.user.aluno.tarefas.get(pk=pk)
@@ -52,7 +54,7 @@ def editar_tarefa(request, pk):
     return render(request, 'tarefas/form.html', {'tarefa': tarefa})
     # mostra o formulario ja preenchido com os dados atuais da tarefa
 
-
+@never_cache
 @login_required
 def apagar_tarefa(request, pk):
     tarefa = request.user.aluno.tarefas.get(pk=pk)

@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Matricula
+from django.views.decorators.cache import never_cache
 
-
+@never_cache
 @login_required
 def minhas_matriculas(request):
     aluno = request.user.aluno

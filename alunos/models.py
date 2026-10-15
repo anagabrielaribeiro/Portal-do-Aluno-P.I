@@ -1,8 +1,24 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date
 from .fields import CampoCriptografado
+from django.core.validators import MaxLengthValidator
+from django.core.exceptions import ValidationError          
+from .validators import validar_cpf, validar_data_nascimento
+import secrets
+import hashlib
+import hmac
+
+
+    # gera um identificador secreto do cpf
+def gerar_hash_cpf(cpf):
+    chave = settings.CHAVE_HASH_CPF
+    if not chave:
+        raise Exception('Defina a CHAVE_HASH_CPF no .env e na vercel')
+    numeros = cpf.replace('.','').replace('-','') # só os numeros
+    return hmac.new(chave.encode(), numeros.encode(), hashlib.sha256).hexdigest()
+
 
 class Aluno(models.Model):
     """
@@ -14,25 +30,28 @@ class Aluno(models.Model):
     # define as opções de sexo
     class Sexo(models.TextChoices):
         FEMININO = 'feminino', 'Feminino'
-        MASCULINO = 'masculino', 'Maculino'
+        MASCULINO = 'masculino', 'Masculino'
         NEUTRO = 'neutro', 'Neutro'
+
 
 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
-        on_delete = models.CASCADE, # Cascade serve para se caso apagar o usuário, apaga o aluno tambem.
+        on_delete = models.PROTECT, 
         related_name='aluno', 
         help_text='Conta de login vinculada ao aluno'
     )
 
+
     nome = models.CharField(max_length=120)
     nome_social = models.CharField(max_length=120, blank=True, null=True)# nome social 
     sexo = models.CharField(max_length=10, choices=Sexo.choices) # sexo feminino, masculino ou neutro
-    cpf = CampoCriptografado(max_length=100, unique=True) # unique para que o cpf não se repita entre alunos diferentes, campo criptografado 
-    rg = CampoCriptografado(max_length=100) #campo criptografado
+    cpf = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(14)])
+    cpf_hash = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
+    rg = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)]) 
     data_nascimento = models.DateField()
-    telefone = models.CharField(max_length=20)
-    endereco = CampoCriptografado(max_length=400) #campo criptografado
+    telefone = CampoCriptografado(max_length=255, validators=[MaxLengthValidator(20)])
+    endereco = CampoCriptografado(max_length=2000, validators=[MaxLengthValidator(255)])
     ra = models.CharField(max_length= 20, unique= True, blank=True, help_text='Registro academico')
     data_ultima_alteracao_contato = models.DateTimeField(null=True, blank=True) # guarda quando foi a ultima vez que telefone/endereço foram alterados
     dados_anonimizados = models.BooleanField(default=False) # marca se os dados doaluno já foram anonimizados por pedido de exclusão
@@ -40,15 +59,71 @@ class Aluno(models.Model):
     def __str__(self):
         return self.nome
 
-    # função para gerar o ra com data de nascimento e final do cpf
+    # função para anonimizar os dados por completo
+    def anonimizar(self):
+        with transaction.atomic() : # ou faz tudo ou não faz nada  
+            self.nome = 'Aluno anonimizado'
+            self.nome_social = None
+            self.cpf = '***.***.***-**'
+            self.cpf_hash = None # zera a assinatura do cpf
+            self.rg = '***'
+            self.telefone = "***"
+            self.endereco = "***"
+            self.data_nascimento = date(1900,1,1)
+            self.ra = f'ANON{self.pk:06d}'
+            self.dados_anonimizados = True
+            self.save()
+
+            usuario = self.usuario
+            usuario.email = ''
+            usuario.username = f'anonimo{self.pk}'
+            usuario.is_active = False
+            usuario.chave_2fa = None
+            usuario.autentificacao_dois_fatores = False
+            usuario.save()
+
+
+    def clean_fields(self, exclude=None):
+        exclude = exclude or []
+        erros = {}
+
+        
+        try:
+            super().clean_fields(exclude=exclude)
+        except ValidationError as e:
+            erros = e.update_error_dict(erros)
+
+        # aluno anonimizado não valida
+        if not self.dados_anonimizados:
+
+            if 'cpf' not in exclude and 'cpf' not in erros and self.cpf:
+                try:
+                    validar_cpf(self.cpf)
+                except ValidationError as e:
+                    erros['cpf'] = e.error_list
+
+            if 'data_nascimento' not in exclude and 'data_nascimento' not in erros and self.data_nascimento:
+                try:
+                    validar_data_nascimento(self.data_nascimento)
+                except ValidationError as e:
+                    erros['data_nascimento'] = e.error_list
+
+        if erros:
+            raise ValidationError(erros)
+
+
+    # função para gerar o ra com ano e mais 6 digitos aleatórios
     def gerar_ra(self):
-        data_str = self.data_nascimento.strftime('%d%m%Y') # junta dia, mês e ano sem separador
-        cpf_numeros = self.cpf.replace('.','').replace('-','') 
-        sufixo_cpf = cpf_numeros[-3:]
-        return f'{data_str}{sufixo_cpf}'
+        ano = timezone.now().year
+        while True:
+            ra = f'{ano}{secrets.randbelow(1000000):06d}'
+            if not Aluno.objects.filter(ra=ra).exists():
+                return ra
 
     # só gera o ra automaticamente se ainda não tiver definido 
     def save(self, *args, **kwargs):
+        if kwargs.get('update_fields') is None and not self.dados_anonimizados:
+            self.cpf_hash = gerar_hash_cpf(self.cpf)
         if not self.ra:
             self.ra = self.gerar_ra()
         super().save(*args, **kwargs)
@@ -60,12 +135,17 @@ class Aluno(models.Model):
     def cpf_mascarado(self):
         numeros = self.cpf.replace('.', '').replace('-', '') # remove o ponto e hífen do cpf
         if len(numeros) != 11:
-            return self.cpf
-        return f"***.{numeros[3:6]}.{numeros[6:9]}-**"  # esconde os 3 primeiros numeros e os 2 ultimos
+            return '***.***.***-**'
+        incio = numeros[:3]
+        fim = numeros[-2:]
+        return f'{incio}.***.***-{fim}'
+
 
     @property 
     def rg_mascarado(self):
-        valor = self.rg # esconde tudo, exceto os 3 ultimos caracteres
+        if not self.rg:
+            return 'Não informado'
+        valor = self.rg.strip()
         if len(valor) <= 3:
             return valor
         visiveis = valor[-3:]

@@ -1,15 +1,27 @@
 from django import forms
 from .models import Aluno
+import re
 
-
+# Fomulario de edição de contato do aluno
 class AlunoContatoForm(forms.ModelForm):
-    """
-    Formulário de edição de contato do alino, apenas os campos telefone e edereço
-    que o aluno pode alterar. Os demais como nome, cpf, rg, ra, sexo e data de nascimento
-    fica bloqueado
-    """
 
-    # configura o formuario dizen qual model ele vem e quais campos usar
     class Meta:
-        model = Aluno # o formulario é baseado no model aluno
+        model = Aluno 
         fields = ['telefone', 'endereco'] # só esses dois campos aparecer e podem ser editados
+
+    def clean_telefone(self):
+        telefone = self.cleaned_data.get('telefone','')
+        numeros = re.sub(r'\D', '', telefone) #re.sub remove tudo o que não for número
+
+        if len(numeros) <10:
+            raise forms.ValidationError('Informe um número de telefone valido com DDD')
+        
+        return telefone
+    
+    def clean_endereco(self):
+        endereco = self.cleaned_data.get('endereco', '')
+
+        if len(endereco.strip()) < 5:
+            raise forms.ValidationError('Informe um endereço válido')
+
+        return endereco

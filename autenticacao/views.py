@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db.models import F
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 
 # Quantidade máxima de tentativas de login antes do bloqueio.
 limite_tentativas = 5
@@ -29,7 +30,6 @@ limite_tentativas_ip= 20
 prazo_2fa = 5 
 
 MSG_LOGIN = 'Usuário ou senha incorretos. Se errou várias vezes, aguarde alguns minutos.'
-
 def home_view(request):
     return render(request, 'autenticacao/home.html')  # o caminho do seu template
 
@@ -177,6 +177,9 @@ def concluir_login(request, usuario):
     limpar_pendente(request) # apaga as chaves teporarias 
     login(request, usuario) # função do Django
 
+    # marca na sessão que este login passou pelo 2FA
+    request.session['dois_fatores_ok'] = True
+
     # busca se exite perfil vinculado, e cria um um registro na auditoria de quem entrou
     aluno = getattr(usuario, 'aluno', None)
     LogAutenticacao.objects.create(
@@ -202,6 +205,7 @@ def concluir_login(request, usuario):
 
 
 # LOGIN
+@never_cache
 def login_view(request):
     # Verifica se o formulário de login foi enviado.
     if request.method == 'POST':
@@ -209,7 +213,8 @@ def login_view(request):
         senha = request.POST.get('password')
 
         # não autentifica ip com muitas falhas
-        if ip_bloqueado(obter_ip(request)):
+        ip = obter_ip(request)
+        if ip_bloqueado(ip):
             messages.error(request, MSG_LOGIN)
             return redirect('login')
 
@@ -221,7 +226,7 @@ def login_view(request):
         )
 
 
-        usuario = Usuario.objects.filter(email=email).first()
+        usuario = Usuario.objects.filter(email__iexact=email).first()
         if usuario: 
             liberar_bloqueio_expirado(usuario)
 
@@ -264,13 +269,15 @@ def login_view(request):
 
 
 # LOGIN COLABORADOR
+@never_cache
 def login_colaborador_view(request):
 
     if request.method == 'POST':
         email = request.POST.get('username')
         senha = request.POST.get('password')
 
-        if ip_bloqueado(obter_ip(request)):
+        ip = obter_ip(request)
+        if ip_bloqueado(ip):
             messages.error(request, MSG_LOGIN)
             return render(request, 'autenticacao/login_colaborador.html')
 
@@ -281,7 +288,7 @@ def login_colaborador_view(request):
             password=senha
         )
 
-        usuario = Usuario.objects.filter(email=email).first()
+        usuario = Usuario.objects.filter(email__iexact=email).first()
         if usuario:
             liberar_bloqueio_expirado(usuario)
 
@@ -320,6 +327,7 @@ def login_colaborador_view(request):
 
 
 # ATIVAÇÃO DO 2FA
+@never_cache
 def ativar_2fa_view(request):
 
     usuario = obter_pendente(request)
@@ -389,6 +397,7 @@ def ativar_2fa_view(request):
 
 
 # VERIFICAÇÃO DO 2FA
+@never_cache
 def verificar_2fa_view(request):
     usuario = obter_pendente(request)
     if not usuario:
@@ -419,6 +428,7 @@ def verificar_2fa_view(request):
 
 
 # DASHBOARD
+@never_cache
 @login_required(login_url='login')
 def dashboard(request):
     if not hasattr(request.user, 'aluno'):

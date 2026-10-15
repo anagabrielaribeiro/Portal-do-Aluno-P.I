@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from alunos.fields import CampoCriptografado
 
 # O usuario já vem pronto com username, password, email, firt name, last name
 # e todo o sistema de hash da senha pelo django
@@ -48,7 +49,7 @@ class Usuario(AbstractUser):
     # chave secreta usada pela biblioteca pyotp gerar e conferir os 2f
     # ela é criada uma vez só, no login, e fica guardada para usar no proximo
     chave_2fa = models.CharField(
-    max_length=32,
+    max_length=255,
     null=True,
     blank=True,
     help_text='chave secreta usada para gerar os códigos do autenticador'
@@ -79,6 +80,8 @@ class LogAuditoria(models.Model):
         LOGIN_FALHO = 'login_falho', 'Falha na Senha'
         BLOQUEIO = 'bloqueio', 'Bloqueio por Tentativas'
         TOTP_FALHO = 'totp_falho', 'Falha no Código 2FA'
+        CONTATO_ALTERADO = 'contato_alterado', 'Contato do aluno foi alterado'
+        ANONIMIZACAO = 'anonimizacion', 'Aluno anonimizado'
 
     class Risco(models.TextChoices):
         BAIXO = 'baixo', 'Baixo'
@@ -88,10 +91,11 @@ class LogAuditoria(models.Model):
     # null=True e blank=True para o caso de tentarem invadir com um usuário que nem existe
     usuario = models.ForeignKey(
         'autenticacao.Usuario',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='logs_seguranca',
         null=True, blank=True
     )
+
     
     acao = models.CharField(max_length=50, choices=Acao.choices)
     risco = models.CharField(max_length=20, choices=Risco.choices, default=Risco.BAIXO)
@@ -99,6 +103,15 @@ class LogAuditoria(models.Model):
     detalhes = models.TextField(blank=True, null=True, help_text="Detalhes extras do evento")
     data_hora = models.DateTimeField(auto_now_add=True) # Preenche sozinho com a hora do servidor
 
+
+    def save(self, *args, **kwargs):
+        if self.pk:                                   # já existe = tentativa de editar
+            raise ValueError('Logs de auditoria não podem ser alterados')
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError('Logs de auditoria não podem ser excluídos')
+    
     def __str__(self):
         # Como o registro vai aparecer se a gente der um "print" nele
         nome_user = self.usuario.username if self.usuario else "Desconhecido"
