@@ -26,11 +26,11 @@
         <td>R$ {{ boleto.valor }}</td>
         <td>
             {% if boleto.pago %}
-                {# se pago e True, mostra Pago independente da data #}
+                {# se pago e True, mostra Pago se não pagou e já passou do vencimento, Vencido; senão Pendente  #}
                 <span class="status-pago">Pago</span>
             {% elif boleto.vencimento < hoje %}
                 {# se nao esta pago e a data de vencimento ja passou, mostra Atrasado #}
-                <span class="status-atrasado">Atrasado</span>
+                <span class="status-atrasado">Vencido</span>
             {% else %}
                 {# se nao esta pago e ainda nao venceu, mostra Pendente #}
                 <span class="status-pendente">Pendente</span>
@@ -38,7 +38,7 @@
         </td>
         <td>
             {% if not boleto.pago %}
-                <a href="{{ boleto.arquivo.url }}" class="btn-baixar" download>Baixar boleto</a>
+                <a href="{% url 'baixar_boleto' boleto.id %}" target="_blank">Baixar boleto</a>
             {% else %}
                 {{ "-" }}
             {% endif %}
