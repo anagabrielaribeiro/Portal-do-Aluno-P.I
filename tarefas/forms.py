@@ -1,6 +1,6 @@
 import re 
 from django import forms
-from djnago.utils.html import strip_tags
+from django.utils.html import strip_tags
 from .models import Tarefa
 
 
