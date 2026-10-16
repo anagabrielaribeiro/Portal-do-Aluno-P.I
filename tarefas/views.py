@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tarefa
 from django.views.decorators.cache import never_cache
 from functools import wraps
+from django.views.decorators.http import require_POST
 
 
 # wrapper função interna executa a as validações de segurança antes de 
