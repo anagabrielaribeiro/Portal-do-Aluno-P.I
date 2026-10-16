@@ -7,7 +7,9 @@ import hashlib
 import smtplib
 from django.core.cache import cache
 from django.shortcuts import render, redirect
-from autenticacao.views import obter_ip_cliente
+from autenticacao.views import obter_ip
+
+
 
 # Chama o logger configurado no settings.py
 logger = logging.getLogger('recuperacao_senha')
@@ -45,7 +47,7 @@ class RecuperarSenhaView(auth_views.PasswordResetView):
 
     def form_valid(self, form):
         email = form.cleaned_data.get('email').strip().lower() 
-        ip = obter_ip_cliente(self.request)
+        ip = obter_ip(self.request)
 
 
         # gera hash do e-mail e valida os limites por IP e por e-mail no cache
@@ -87,7 +89,7 @@ class ConfirmarNovaSenhaView(auth_views.PasswordResetConfirmView):
         usuario.tentativas_login_falha = 0 
         usuario.bloqueio_ate = None
 
-        # e ajustado 'obter_ip' para 'obter_ip_cliente' para evitar Erro 500.
+        
         resposta = super().form_valid(form)
         logger.info(f'SUCESSO: Senha redefinida e validaada com sucesso pelo token de acesso' f"(usuario_id={usuario.pk}, ip={obter_ip(self.request)})")
         return resposta
