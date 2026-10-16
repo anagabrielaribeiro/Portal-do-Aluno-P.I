@@ -4,6 +4,8 @@ from .models import Tarefa
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from django.views.decorators.http import require_POST
+from django.core.exceptions import PermissionDenied
+from .forms import TarefaForm, TarefaEdicaoForm
 
 
 # wrapper função interna executa a as validações de segurança antes de 
@@ -44,7 +46,7 @@ def criar_tarefa(request):
             return redirect('lista_tarefas')
     else:
         form = TarefaForm()
-    return render(request, 'tarefa/form.html', {'form': form})
+    return render(request, 'tarefas/form.html', {'form': form})
 
 
 
