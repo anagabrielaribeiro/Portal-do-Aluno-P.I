@@ -2,65 +2,80 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tarefa
 from django.views.decorators.cache import never_cache
+from functools import wraps
+from django.views.decorators.http import require_POST
+from django.core.exceptions import PermissionDenied
+from .forms import TarefaForm, TarefaEdicaoForm
 
-@never_cache
+
+# wrapper função interna executa a as validações de segurança antes de 
+# deixar a pagina carregar
+def aluno_required(view):
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        # Tenta pegar o aluno vinculado; se não existir ou der erro, bloqueia com 403
+        aluno = getattr(request.user, 'aluno', None)
+        if not aluno:
+            raise PermissionDenied
+            
+        request.aluno = aluno
+        return view(request, *args, **kwargs)
+        
+    return wrapper
+
+
+# só as tarefas do aluno logado, da mais recente para a mais antiga
+@never_cache 
 @login_required
 def lista_tarefas(request):
     aluno = request.user.aluno
-    # pega o aluno ligado ao usuario que esta logado
-
-    tarefas = Tarefa.objects.filter(aluno=aluno).order_by('-data_criacao') # o sinal de menos na frente inverte a ordem, mostrando a mais recente primeiro
-    # busca só as tarefas desse aluno
-   
+    tarefas = Tarefa.objects.filter(aluno=aluno).order_by('-data_criacao') 
     return render(request, 'tarefas/lista.html', {'tarefas': tarefas})
-    # manda a lista de tarefas pro template mostrar
+    
 
-@never_cache
-@login_required
+@never_cache # never_cache impede que o navegador salve a pag em cache
+@login_required # usa apenas usuarios autenticados 
+@aluno_required # se o usuario loga é aluno 
 def criar_tarefa(request):
-    if request.method == 'POST': # se o aluno enviou o formulario preenchido (POST)
-        
-        Tarefa.objects.create(
-            aluno=request.user.aluno,
-            titulo=request.POST.get('titulo'),
-            descricao=request.POST.get('descricao'),
-        )
-        # cria a tarefa nova, sempre ao aluno logado
+    if request.method == 'POST': 
+        form = TarefaForm(request.POST)
+        if form.is_valid():
+            tarefa = form.save(commit=False)
+            tarefa.aluno = request.aluno
+            tarefa.save()
+            return redirect('lista_tarefas')
+    else:
+        form = TarefaForm()
+    return render(request, 'tarefas/form.html', {'form': form})
 
-        return redirect('lista_tarefas')
-        # depois de salvar, volta pra lista, evita reenvio do formulario se der F5
 
-    return render(request, 'tarefas/form.html')
-    # se nao for POST, so mostra o formulario vazio pra preencher
 
 @never_cache
 @login_required
+@aluno_required
 def editar_tarefa(request, pk):
-    tarefa = request.user.aluno.tarefas.get(pk=pk)
-    # busca a tarefa pelo id, mas só dentro das tarefas do aluno logado
-    # se o id não existir ou for de outro aluno, erro
-
+    # 404 se o id não existir ou se a tarefa for de outro aluno
+    tarefa = get_object_or_404(Tarefa, pk=pk, aluno=request.aluno)
     if request.method == 'POST':
-        tarefa.titulo = request.POST.get('titulo')
-        tarefa.descricao = request.POST.get('descricao')
-        tarefa.concluida = 'concluida' in request.POST
-        # checkbox so vem no POST quando esta marcado
+        form = TarefaEdicaoForm(request.POST, instance=tarefa) # intance faz o form atualizar a tarefa existemte
+        if form.is_valid():
+            form.save()
+            return redirect('lista_tarefas')
+    else: 
+        # na primeira abertura, o form já vem preenchidos com os dados atuais
+        form = TarefaEdicaoForm(instance=tarefa)
+    return render(request, 'tarefas/form.html', {'form': form,'tarefa': tarefa})
 
-        tarefa.save()
-        # grava as alteracoes no banco
 
-        return redirect('lista_tarefas')
 
-    return render(request, 'tarefas/form.html', {'tarefa': tarefa})
-    # mostra o formulario ja preenchido com os dados atuais da tarefa
 
 @never_cache
 @login_required
+@aluno_required
+@require_POST # restringe a view para aceitar apenas POST (sem get)
 def apagar_tarefa(request, pk):
-    tarefa = request.user.aluno.tarefas.get(pk=pk)
-    #  so apaga se for do proprio aluno
-
+    # só encontra a tarefa do proprio aluno, o pk é o id da tarefa não do usuario
+    tarefa = get_object_or_404(Tarefa, pk=pk, aluno=request.aluno)
     tarefa.delete()
-    # remove a tarefa do banco
-
     return redirect('lista_tarefas')
+

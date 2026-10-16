@@ -14,16 +14,24 @@
 
 <form method="post" class="form-tarefa">
     {% csrf_token %}
-    <input type="text" name="titulo" value="{{ tarefa.titulo|default:'' }}" placeholder="Título" required>
-    <!-- default vazio evita mostrar a palavra None quando for uma tarefa nova -->
-    <textarea name="descricao" placeholder="Descrição">{{ tarefa.descricao|default:'' }}</textarea>
+
+    {{ form.non_field_errors }}
+
+    {{ form.titulo.errors }}
+    {{ form.titulo }}
+    <!-- o form devolve os valores digitados quando a validacao falha, sem precisar de default -->
+
+    {{ form.descricao.errors }}
+    {{ form.descricao }}
+
     {% if tarefa %}
     <label>
-        <input type="checkbox" name="concluida" {% if tarefa.concluida %}checked{% endif %}>
+        {{ form.concluida }}
         Concluída
     </label>
-    <!-- esse checkbox so aparece na edicao, nao faz sentido marcar concluida ao criar uma tarefa nova -->
+    <!-- o campo concluida so existe no form de edicao, por isso fica dentro do if -->
     {% endif %}
+
     <button type="submit">Salvar</button>
 </form>
 {% endblock %}

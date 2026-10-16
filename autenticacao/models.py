@@ -148,3 +148,4 @@ class LogAutenticacao(models.Model):
     def delete (self, *args, **kwargs):# repassa exatamente os mesmos argumentos que chegaram
         raise ValueError('Logs de autenticação não pode ser excluídos')
 
+#teste

@@ -17,9 +17,15 @@
     <li class="item-tarefa {% if tarefa.concluida %}concluida{% endif %}">
         <!-- a classe concluida so entra na li quando tarefa.concluida e True, usada no CSS pra riscar o texto -->
         <span class="titulo-tarefa">{{ tarefa.titulo }}</span>
+        <!-- o Django escapa o texto automaticamente, então nada aqui vira código -->
         <div class="acoes-tarefa">
             <a href="{% url 'editar_tarefa' tarefa.pk %}">Editar</a>
-            <a href="{% url 'apagar_tarefa' tarefa.pk %}">Apagar</a>
+
+            <!-- apagar agora é um formulário POST com token CSRF, não mais um link -->
+            <form method="post" action="{% url 'apagar_tarefa' tarefa.pk %}" class="form-apagar">
+                {% csrf_token %}
+                <button type="submit">Apagar</button>
+            </form>
         </div>
     </li>
     {% endfor %}

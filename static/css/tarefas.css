@@ -81,3 +81,26 @@
 .form-tarefa button:hover {
     background: #5b21b6;
 }
+
+.acoes-tarefa .form-apagar {
+    display: inline;
+}
+
+.acoes-tarefa .form-apagar button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* mensagens de erro do formulário */
+.form-tarefa .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 4px;
+    color: #b00020;
+    font-size: 0.9rem;
+}
