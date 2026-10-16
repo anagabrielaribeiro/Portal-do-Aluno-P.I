@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 # Chama o logger configurado no settings.py
 logger = logging.getLogger('recuperacao_senha')
 
+# criar branch no neon
 
 # Nota: não precisamos definir "success_url" em nenhuma dessas views. 
 # O Django já sabe para onde redirecionar sozinho, porque ele procura automaticamente pelas urls de nome 
