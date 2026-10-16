@@ -22,7 +22,7 @@ def financeiro(request):
         # colaborador vê tela sem boletos (evita o erro 500)
         return render(request, 'financeiro/financeiro.html', {'boletos': Boleto.objects.none(), 'hoje': hoje})
 
-    boletos = Boleto.objects,filter(aluno=aluno) # só os boletos desse aluno
+    boletos = Boleto.objects.filter(aluno=aluno) # só os boletos desse aluno
     return render(request, 'financeiro/financeiro.html', {'boletos': boletos, 'hoje': hoje})
 
 
@@ -31,7 +31,7 @@ def financeiro(request):
 def baixar_boleto(request, boleto_id):
     # gera o PDF na hora, só para o dono do boleto
     try: 
-        aluno = request.user.Aluno
+        aluno = request.user.aluno
     except Aluno.DoesNotExist:
         raise Http404 # colaborador não tem boleto
 
