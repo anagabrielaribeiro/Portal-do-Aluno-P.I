@@ -25,10 +25,8 @@ def limpar_texto(valor):
 
 
 class TarefaForm(forms.ModelForm):
-
-
     class Meta:
-        mdoel = Tarefa 
+        model = Tarefa 
         fields = ['titulo', 'descricao']
         widgets = {
             'titulo': forms.TextInput(attrs={'placeholder': 'Título'}),
@@ -57,5 +55,5 @@ class TarefaForm(forms.ModelForm):
 # na edição marcar a tarefa como concluida
 class TarefaEdicaoForm(TarefaForm):
     
-    class Meta(TarefaEdicaoForm.Meta):
-        fields = ['titulo', 'descicao', 'concluida']
+    class Meta(TarefaForm.Meta):
+        fields = ['titulo', 'descricao', 'concluida']

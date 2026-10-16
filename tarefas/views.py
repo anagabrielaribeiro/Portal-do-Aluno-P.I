@@ -55,13 +55,13 @@ def editar_tarefa(request, pk):
     # 404 se o id não existir ou se a tarefa for de outro aluno
     tarefa = get_object_or_404(Tarefa, pk=pk, aluno=request.aluno)
     if request.method == 'POST':
-        form = TarefaEdicaoForm(request.POST, isinstance=tarefa) # intance faz o form atualizar a tarefa existemte
+        form = TarefaEdicaoForm(request.POST, instance=tarefa) # intance faz o form atualizar a tarefa existemte
         if form.is_valid():
             form.save()
             return redirect('lista_tarefas')
     else: 
         # na primeira abertura, o form já vem preenchidos com os dados atuais
-        form = TarefaEdicaoForm(isinstance=tarefa)
+        form = TarefaEdicaoForm(instance=tarefa)
     return render(request, 'tarefas/form.html', {'form': form,'tarefa': tarefa})
 
 
