@@ -21,14 +21,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('gestao-portal/', admin.site.urls), # tela administrativa que a instituição usa
-    path('', include('autenticacao.urls')), #
+    path('gestao-portal/', admin.site.urls),
+    path('', include('autenticacao.urls')),
     path('', include('recuperacao_senha.urls')),
     path('alunos/', include('alunos.urls')),
     path('matriculas/', include('matriculas.urls')),
     path('privacidade/', include('privacidade_lgpd.urls')),
     path('financeiro/', include('financeiro.urls')),
     path('tarefas/', include('tarefas.urls')),
+    path('calendario/', include('calendario_horarios.urls')), # Adiciona esta linha
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
