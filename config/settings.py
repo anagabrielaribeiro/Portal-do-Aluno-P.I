@@ -79,6 +79,8 @@ CACHES = {
     }
 }
 
+EMAIL_TIMEOUT = 10
+
 AUTHENTICATION_BACKENDS = [
     'autenticacao.backends.EmailBackend',
 ]

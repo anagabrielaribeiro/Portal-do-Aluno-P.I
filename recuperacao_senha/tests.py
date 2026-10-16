@@ -1,16 +1,25 @@
-from django.test import TestCase
+from datetime import timedelta
+from unittest.mock import patch
+import smtplib
+
+from django.test import TestCase, override_settings
 from django.core import mail
+from django.core.cache import cache
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 
 from autenticacao.models import Usuario
 
-
+@override_settings(SECURE_SSL_REDIRECT=False) # o teste usa http
 class RecuperacaoSenhaTests(TestCase):
 
     def setUp(self):
+
+        cache.clear()
+
         # cria um usuario de teste direto no banco de teste do Django
         # (esse banco eh separado, criado e apagado automaticamente a cada rodada de teste,
         # entao nao mexe no banco real do projeto)
@@ -79,3 +88,52 @@ class RecuperacaoSenhaTests(TestCase):
         # confere se a senha realmente mudou no banco
         self.usuario.refresh_from_db()
         self.assertTrue(self.usuario.check_password('SenhaNova456!'))
+
+    def test_log_nao_guarda_email_completo(self):
+        # o log registra o e-mail mascarado, nunca o endereço inteiro
+        with self.assertLogs('recuperacao_senha', level='INFO') as registro:
+            self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        self.assertNotIn('teste@exemplo.com', '\n'.join(registro.output))
+
+    def test_limite_de_pedidos_por_email(self):
+        # os 3 primeiros pedidos passam, o 4 é barrado
+        for _ in range(3):
+            resp = self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+            self.assertEqual(resp.status_code, 302)
+        resp = self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        self.assertEqual(resp.status_code, 429)
+
+    def test_erro_no_smtp_nao_quebra_a_tela(self):
+        # se o servidor de e-mail falhar, o usuário ainda vê a tela de sucesso (sem erro 500)
+        with patch('django.core.mail.EmailMultiAlternatives.send',
+                   side_effect=smtplib.SMTPException('falha')):
+            resp = self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        self.assertEqual(resp.status_code, 302)
+
+    @override_settings(ALLOWED_HOSTS=['testserver'])
+    def test_host_forjado_eh_recusado(self):
+        resp = self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'},
+                                HTTP_HOST='falso.vercel.app')
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_troca_de_senha_zera_bloqueio(self):
+        # depois de redefinir a senha, o bloqueio da conta é limpo
+        self.usuario.tentativas_login_falha = 5
+        self.usuario.bloqueio_ate = timezone.now() + timedelta(minutes=15)
+        self.usuario.save()
+
+        uid = urlsafe_base64_encode(force_bytes(self.usuario.pk))
+        token = default_token_generator.make_token(self.usuario)
+        resp = self.client.get(reverse('password_reset_confirm', kwargs={
+            'uidb64': uid,
+            'token': token,
+        }), follow=True)
+        self.client.post(resp.request['PATH_INFO'], {
+            'new_password1': 'SenhaNova456!',
+            'new_password2': 'SenhaNova456!',
+        })
+
+        self.usuario.refresh_from_db()
+        self.assertEqual(self.usuario.tentativas_login_falha, 0)
+        self.assertIsNone(self.usuario.bloqueio_ate)
