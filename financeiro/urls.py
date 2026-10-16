@@ -2,6 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.financeiro, name='financeiro'),
-    # essa e a unica rota do app, mostra a tela de demonstrativo financeiro
-]
+    path('', views.financeiro, name='financeiro'), # tela do financeiro 
+    path('boleto/<int:boleto_id>/', views.baixar_boleto, name='baixar_boleto'),  # rota do download
+] 
