@@ -14,7 +14,11 @@ class Consentimento(models.Model):
     data_revogacao = models.DateTimeField(null=True, blank=True) # quando ele revogou 
 
     def revogar(self):
-        # não apaga o registro, só marca a data de revogação (mantém histórico)
+        # se já foi revogado, não faz nada, não sobrescreve a data original
+        if self.data_revogacao is not None:
+            return
+        # não apaga o registro, só marca como não aceito e guarda a data
+        self.aceito = False
         self.data_revogacao = timezone.now()
-        self.save()
+        self.save(update_fields=['aceito', 'data_revogacao'])
 
