@@ -148,11 +148,24 @@ class ConsentimentoViewsTest(BaseLGPD):
         self.assertNotContains(resposta, 'popup-overlay')
 
     def test_aceitar_cria_um_consentimento_por_finalidade(self):
+        marcadas = finalidades_de_consentimento()
+        self.client.post(reverse('aceitar_termos'), {'finalidades': marcadas})
+        criadas = Consentimento.objects.filter(aluno=self.aluno)
+        self.assertEqual(criadas.count(), len(marcadas))
+        self.assertTrue(all(c.aceito for c in criadas))
+
+    def test_recusar_tudo_registra_e_nao_bloqueia(self):
+        # envia sem marcar nenhuma caixa
         self.client.post(reverse('aceitar_termos'))
         criadas = Consentimento.objects.filter(aluno=self.aluno)
         self.assertEqual(criadas.count(), len(finalidades_de_consentimento()))
-        self.assertTrue(all(c.aceito for c in criadas))
+        self.assertTrue(all(not c.aceito for c in criadas))
 
+        # o aluno continua acessando o portal normalmente
+        resposta = self.client.get(reverse('meus_consentimentos'))
+        self.assertEqual(resposta.status_code, 200)
+        self.assertNotContains(resposta, 'popup-overlay')
+        
     def test_aceitar_duas_vezes_nao_duplica(self):
         self.client.post(reverse('aceitar_termos'))
         self.client.post(reverse('aceitar_termos'))
@@ -164,6 +177,7 @@ class ConsentimentoViewsTest(BaseLGPD):
     def test_aceitar_por_get_nao_e_permitido(self):
         self.assertEqual(self.client.get(reverse('aceitar_termos')).status_code, 405)
 
+    
     def test_revogar_marca_o_consentimento(self):
         c = Consentimento.objects.create(aluno=self.aluno, finalidade='contato por telefone')
         self.client.post(reverse('revogar_consentimento', args=[c.id]))

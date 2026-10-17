@@ -52,14 +52,17 @@ def meus_consentimentos(request):
 def aceitar_termos(request):
     aluno = request.user.aluno  # pega o aluno ligado ao usuário logado
 
+    # as caixas marcadas são as finalidades que o aluno aceitou
+    aceitas = request.POST.getlist('finalidades')
+
     # percorre cada finalidade e cria um Consentimento pra cada uma
     for finalidade in finalidades_de_consentimento():
-        # só cria se o aluno não tem consentimento ativo pra essa finalidade
-        if not aluno.consentimentos.filter(finalidade=finalidade, aceito=True).exists():
-            Consentimento.objects.create(aluno=aluno, finalidade=finalidade)
+        # se já decidiu antes sobre essa finalidade, não cria de novo
+        if aluno.consentimentos.filter(finalidade=finalidade).exists():
+            continue
+        Consentimento.objects.create(aluno=aluno, finalidade=finalidade, aceito=(finalidade in aceitas))
 
     request.session['termos_aceitos'] = True
-
     # depois de criar tudo, volta pra tela de consentimentos
     return redirect('meus_consentimentos')
 
