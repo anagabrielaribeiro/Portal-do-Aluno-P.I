@@ -41,9 +41,11 @@
 
     <div class="header-privacidade">
         <h2>Privacidade e LGPD</h2>
-        <a href="{% url 'exportar_dados_json' %}" class="btn-exportar">
-            ↓ Exportar Meus Dados (JSON)
-        </a>
+        <form method="post" action="{% url 'exportar_dados_json' %}" class="form-exportar">
+            {% csrf_token %}
+            <input type="password" name="senha" placeholder="Confirme sua senha" required autocomplete="current-password">
+            <button type="submit" class="btn-exportar">↓ Exportar Meus Dados (JSON)</button>
+        </form>
     </div>
 
     <p class="texto-descritivo">

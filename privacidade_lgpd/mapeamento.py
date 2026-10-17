@@ -37,7 +37,12 @@ DADOS_PESSOAIS = [
     {'campo': 'email', 'app': 'autenticacao', 'finalidade': 'envio de avisos e comunicados',
      'base_legal': 'consentimento',
      'descricao': 'usado para enviar avisos e novidades que não são essenciais ao curso'},
-     
+    {'campo': 'nome_social', 'app': 'alunos', 'finalidade': 'identificação escolar',
+     'base_legal': 'execução de contrato',
+     'descricao': 'nome pelo qual o aluno prefere ser chamado, exibido no lugar do nome civil quando informado'},
+    {'campo': 'sexo', 'app': 'alunos', 'finalidade': 'cadastro do aluno',
+     'base_legal': 'execução de contrato',
+     'descricao': 'informação do cadastro do aluno'},
 ]
 
 # só as finalidades que realmente precisam do aceite do aluno sem repetir

@@ -76,7 +76,7 @@ def revogar_consentimento(request, consentimento_id):
     return redirect('meus_consentimentos') # depois de revogar, volta pra mesma página atualizada
 
 
-
+# exportar o Lgpd e pede senha para baixar
 @never_cache
 @login_required
 @somente_aluno
@@ -84,38 +84,61 @@ def revogar_consentimento(request, consentimento_id):
 def exportar_dados_json(request):
     aluno = request.user.aluno
     
-    # Busca todas as matrículas para incluir no histórico acadêmico do JSON
-    matriculas = aluno.matriculas.all()
+    # pede a senha de nov, para baixar por conta dos dados pessoais no arquivo
+    if not request.usar.check_password(request.POST.get('senha', '')):
+        messages.error(request, 'Senha incorreta')
+        return redirect('meus_consentimentos')
+
     lista_matriculas = []
-    for m in matriculas:
+    for m in aluno.matriculas.select_related('curso'):
         lista_matriculas.append({
-            "curso": m.curso.nome,
-            "status": m.get_status_display(),
-            "periodo_letivo": m.periodo_letivo
+            'codigo': m.codigo,  
+            'curso': m.curso.nome,
+            'status': m.get_status_display(),
+            'periodo_letivo': m.periodo_letivo,
+            'data_matricula': m.data_matricula,
         })
+
+        lista_consentimentos = []
+        for c in aluno.consentimento.all():
+            lista_consentimentos.append({
+                'finalidade': c.finalidade,
+                'aceito': c.aceito,
+                'versao_termo': c.versao_termo,
+                'data_registro': c.data_registro,
+                'data_revogacao': c.data_revogacao,
+            })
         
-    # Monta um dicionário Python organizando tudo o que o portal sabe sobre o aluno
-    dados = {
-        "identificacao": {
-            "nome": aluno.nome,
-            "nome_social": aluno.nome_social,
-            "cpf": aluno.cpf, # Na exportação, o titular tem o direito de ver o CPF real (sem máscara)
-            "rg": aluno.rg,
-            "data_nascimento": str(aluno.data_nascimento),
-            "sexo": aluno.get_sexo_display()
-        },
-        "contato": {
-            "email": request.user.email,
-            "telefone": aluno.telefone,
-            "endereco": aluno.endereco,
-        },
-        "vida_academica": lista_matriculas,
-    }
-    
+        lista_pedidos = []
+        for p in aluno.solicitacoes_exclusao.all():
+            lista_pedidos.append({'data_pedido': p.data_pedido, 'status': p.get_status_display()})
+
+        dados = {
+            'identificacao':{
+                'ra': aluno.ra,
+                'nome': aluno.nome,
+                'nome_social': aluno.nome_social,
+                'nome_exibicao': aluno.nome_exibicao,
+                'cpf': aluno.cpf,
+                'rg': aluno.rg,
+                'data_nascimento': str(aluno.data_nascimento),
+                'sexo': aluno.get_sexo_display(),
+            },
+            'contato':{
+                'email': request.user.email,
+                'telefone': aluno.telefone,
+                'endereco': aluno.endereco,
+            },
+            'acesso': {'ultimo_ip_acesso': request.user.ultimo_ip_acesso},
+            'vida_academica': lista_matriculas,
+            'consentimentos': lista_consentimentos,
+            'solicitacoes_de_exclusao': lista_pedidos,
+            # colocar notas, boletos e calendarios seguindo o mesmo padrão
+        }
+
     # Converte o dicionário para JSON estruturado.
     # ensure_ascii=False permite acentuação (como "São Paulo"). indent=4 deixa o arquivo bonito para leitura.
     response = JsonResponse(dados, json_dumps_params={'ensure_ascii': False, 'indent': 4})
-    
     # Esse comando avisa ao navegador que não é para exibir a tela, e sim para baixar um arquivo.
     response['Content-Disposition'] = 'attachment; filename="meus_dados_portal_pi.json"'
     
