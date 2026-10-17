@@ -6,10 +6,12 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
-from .models import Consentimento
+from .models import Consentimento, SolicitacaoExclusao
 from .mapeamento import finalidades_de_consentimento, dados_obrigatorios
 from functools import wraps
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
+
 
 
 def somente_aluno(view):
@@ -126,11 +128,24 @@ def exportar_dados_json(request):
 @somente_aluno
 @require_POST
 def solicitar_exclusao(request):
-    """
-    Atende ao Requisito 4.10: Fluxo de solicitação de exclusão.
-    Apenas registra a intenção do aluno e avisa que a secretaria fará a anonimização.
-    """
-    # Exibe a mensagem de sucesso na tela avisando que o DPO/Secretaria recebeu o pedido
-    messages.success(request, "Sua solicitação de exclusão foi enviada para a secretaria acadêmica. Você receberá um retorno no e-mail cadastrado em até 48 horas.")
-    
+    aluno = request.user.aluno
+
+    # se já existe um pedido em andamento, não cria outro 
+    if aluno.solicitacoes_exclusao.filter(status='pendente').exists():
+        messages.info(request, 'Você já tem uma solicitação de exclusão em andamento.')
+        return redirect('meus_consentimentos')
+    pedido = SolicitacaoExclusao.objects.create(aluno=aluno)  # o pedido fica salvo no banco
+
+    try:
+        send_mail(
+            subject='Pedido de exclusão de dados recebido',
+            message = f'Recebemos seu pedido (protocolo{pedido.id}). A secretaria acadêmica entrará em contato em até 48 horas',
+            from_email = None,
+            recipient_list = [request.user.email],
+        )
+        menssages.sucess(request, f'Pedido registrado (protocolo {pedido.id}). Enviamos uma confirmação para o email')
+    except Exception:
+        # o pedido já está salvo então o erro não da problema na pagina
+        messages.warning(request, f"Pedido registrado (protocolo {pedido.id}), mas não conseguimos enviar o e-mail de confirmação.")
+
     return redirect('meus_consentimentos')
