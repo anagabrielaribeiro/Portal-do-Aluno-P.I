@@ -1,16 +1,32 @@
 # views de consentimento: mostrar a lista e revogar um consentimento
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from .models import Consentimento
 from .mapeamento import DADOS_PESSOAIS
+from functools import wraps
+from django.core.exceptions import PermissionDenied
+
+
+def somente_aluno(view):
+    # barra quem não é aluno com erro 403 
+    @wraps(view)
+    def interna(request, *args, **kwargs):
+        if getattr(request.user, 'aluno', None) is None:
+            raise PermissionDenied
+        return view(request, *args, **kwargs)
+    return interna
+
+
 
 @never_cache
 @login_required
+@somente_aluno
+@require_POST
 def meus_consentimentos(request):
     # pega só os consentimentos do aluno logado
     consentimentos = request.user.aluno.consentimentos.all()
@@ -33,6 +49,7 @@ def meus_consentimentos(request):
 # cria um consentimento pra cada finalidade quando o aluno clica "li e concordo"
 @never_cache
 @login_required
+@somente_aluno
 @require_POST
 def aceitar_termos(request):
     aluno = request.user.aluno  # pega o aluno ligado ao usuário logado
@@ -47,18 +64,25 @@ def aceitar_termos(request):
     # depois de criar tudo, volta pra tela de consentimentos
     return redirect('meus_consentimentos')
 
+
+
 @never_cache
 @login_required
+@somente_aluno
 @require_POST
 def revogar_consentimento(request, consentimento_id):
-    # pega o consentimento pelo id, mas só se for do aluno logado 
-    consentimento = request.user.aluno.consentimentos.get(id=consentimento_id)
+    # busca o consentimento só entre o aluno logado, se não achar da erro 404
+    consentimento = get_object_or_404(request.user.aluno.consentimentos, id = consentimento_id)
 
-    consentimento.revogar()# chama o método que já criamos no model, que marca a data de revogação
+    consentimento.revogar() # marca como não aceito e guarda a data
     return redirect('meus_consentimentos') # depois de revogar, volta pra mesma página atualizada
+
+
 
 @never_cache
 @login_required
+@somente_aluno
+@require_POST
 def exportar_dados_json(request):
     aluno = request.user.aluno
     
@@ -99,8 +123,11 @@ def exportar_dados_json(request):
     
     return response
 
+
+
 @never_cache
 @login_required
+@somente_aluno
 @require_POST
 def solicitar_exclusao(request):
     """
