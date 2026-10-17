@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from .models import Consentimento
-from .mapeamento import DADOS_PESSOAIS
+from .mapeamento import finalidades_de_consentimento, dados_obrigatorios
 from functools import wraps
 from django.core.exceptions import PermissionDenied
 
@@ -34,14 +34,11 @@ def meus_consentimentos(request):
     # se o aluno ainda não tem consentimento, aparece popup
     mostrar_popup = not consentimentos.exists()
 
-    # pega as finalidades unicas listadas no mapeamento, sem repetir 
-    finalidades = sorted(set(d['finalidade'] for d in DADOS_PESSOAIS))
-
-    # lista de consentimentos do aluno que pode estar vazia, e diz pro template se deve mostrar o pop_up
     return render(request, 'privacidade_lgpd/meus_consentimentos.html', {
         'consentimentos': consentimentos,
         'mostrar_popup' : mostrar_popup,
-        'finalidades': finalidades,
+        'finalidades': finalidades_de_consentimento(),
+        'obrigatorios' : dados_obrigatorios(),
     })
 
 
@@ -54,12 +51,11 @@ def meus_consentimentos(request):
 def aceitar_termos(request):
     aluno = request.user.aluno  # pega o aluno ligado ao usuário logado
 
-    # pega as finalidades do mapeamento.py, sem repetir (set remove duplicadas, sorted ordena)
-    finalidades = sorted(set(d['finalidade'] for d in DADOS_PESSOAIS))
-
     # percorre cada finalidade e cria um Consentimento pra cada uma
-    for finalidade in finalidades:
-        Consentimento.objects.create(aluno=aluno, finalidade=finalidade)
+    for finalidade in finalidades_de_consentimento():
+        # só cria se o aluno não tem consentimento ativo pra essa finalidade
+        if not aluno.consentimentos.filter(finalidade=finalidade, aceito=True).exists():
+            Consentimento.objects.create(aluno=aluno, finalidade=finalidade)
 
     # depois de criar tudo, volta pra tela de consentimentos
     return redirect('meus_consentimentos')
