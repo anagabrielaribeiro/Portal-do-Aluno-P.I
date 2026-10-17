@@ -28,7 +28,6 @@ def somente_aluno(view):
 @never_cache
 @login_required
 @somente_aluno
-@require_POST
 def meus_consentimentos(request):
     # pega só os consentimentos do aluno logado
     consentimentos = request.user.aluno.consentimentos.all()
@@ -59,6 +58,8 @@ def aceitar_termos(request):
         if not aluno.consentimentos.filter(finalidade=finalidade, aceito=True).exists():
             Consentimento.objects.create(aluno=aluno, finalidade=finalidade)
 
+    request.session['termos_aceitos'] = True
+
     # depois de criar tudo, volta pra tela de consentimentos
     return redirect('meus_consentimentos')
 
@@ -85,7 +86,7 @@ def exportar_dados_json(request):
     aluno = request.user.aluno
     
     # pede a senha de nov, para baixar por conta dos dados pessoais no arquivo
-    if not request.usar.check_password(request.POST.get('senha', '')):
+    if not request.user.check_password(request.POST.get('senha', '')):
         messages.error(request, 'Senha incorreta')
         return redirect('meus_consentimentos')
 
@@ -99,37 +100,37 @@ def exportar_dados_json(request):
             'data_matricula': m.data_matricula,
         })
 
-        lista_consentimentos = []
-        for c in aluno.consentimento.all():
-            lista_consentimentos.append({
-                'finalidade': c.finalidade,
-                'aceito': c.aceito,
-                'versao_termo': c.versao_termo,
-                'data_registro': c.data_registro,
-                'data_revogacao': c.data_revogacao,
-            })
+    lista_consentimentos = []
+    for c in aluno.consentimentos.all():
+        lista_consentimentos.append({
+            'finalidade': c.finalidade,
+            'aceito': c.aceito,
+            'versao_termo': c.versao_termo,
+            'data_registro': c.data_registro,
+            'data_revogacao': c.data_revogacao,
+        })
         
-        lista_pedidos = []
-        for p in aluno.solicitacoes_exclusao.all():
-            lista_pedidos.append({'data_pedido': p.data_pedido, 'status': p.get_status_display()})
-
-        dados = {
-            'identificacao':{
-                'ra': aluno.ra,
-                'nome': aluno.nome,
-                'nome_social': aluno.nome_social,
-                'nome_exibicao': aluno.nome_exibicao,
-                'cpf': aluno.cpf,
-                'rg': aluno.rg,
-                'data_nascimento': str(aluno.data_nascimento),
-                'sexo': aluno.get_sexo_display(),
+    lista_pedidos = []
+    for p in aluno.solicitacoes_exclusao.all():
+        lista_pedidos.append({'data_pedido': p.data_pedido, 'status': p.get_status_display()})
+            
+    dados = {
+        'identificacao':{
+            'ra': aluno.ra,
+            'nome': aluno.nome,
+            'nome_social': aluno.nome_social,
+            'nome_exibicao': aluno.nome_exibicao,
+            'cpf': aluno.cpf,
+            'rg': aluno.rg,
+            'data_nascimento': str(aluno.data_nascimento),
+            'sexo': aluno.get_sexo_display(),
+        },
+        'contato':{
+            'email': request.user.email,
+            'telefone': aluno.telefone,
+            'endereco': aluno.endereco,
             },
-            'contato':{
-                'email': request.user.email,
-                'telefone': aluno.telefone,
-                'endereco': aluno.endereco,
-            },
-            'acesso': {'ultimo_ip_acesso': request.user.ultimo_ip_acesso},
+        'acesso': {'ultimo_ip_acesso': request.user.ultimo_ip_acesso},
             'vida_academica': lista_matriculas,
             'consentimentos': lista_consentimentos,
             'solicitacoes_de_exclusao': lista_pedidos,
@@ -162,7 +163,7 @@ def solicitar_exclusao(request):
     try:
         send_mail(
             subject='Pedido de exclusão de dados recebido',
-            message = f'Recebemos seu pedido (protocolo{pedido.id}). A secretaria acadêmica entrará em contato em até 48 horas',
+            message = f'Recebemos seu pedido (protocolo {pedido.id}). A secretaria acadêmica entrará em contato em até 48 horas',
             from_email = None,
             recipient_list = [request.user.email],
         )
@@ -171,4 +172,6 @@ def solicitar_exclusao(request):
         # o pedido já está salvo então o erro não da problema na pagina
         messages.warning(request, f"Pedido registrado (protocolo {pedido.id}), mas não conseguimos enviar o e-mail de confirmação.")
 
+    request.session['termos_aceitos'] = True # o context processor não precisa mais consultar 
     return redirect('meus_consentimentos')
+    return response
