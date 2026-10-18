@@ -189,6 +189,7 @@ def concluir_login(request, usuario):
     # Redirecionamento direto e seguro para o dashboard do aluno
     return redirect('dashboard')
 
+# teste 
 
 
 # LOGIN

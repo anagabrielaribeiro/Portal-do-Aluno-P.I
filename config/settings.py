@@ -11,12 +11,10 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
-import os
 import dj_database_url
-
-from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured 
 
 load_dotenv() # Puxa as variáveis do arquivo .env para a memória
 
@@ -28,13 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-dev-key'
-)
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('Defina DJANGO_SECRET_KEY no ambiente')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS dinâmico que lê da variável de ambiente quando existir
 # caso contrário, usa o padrão seguro com .vercel.app, localhost e 127.0.0.1
@@ -120,12 +117,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# falha com erro claro se DATABASE_URL não existir, em vez de subir com banco inválido
+if not os.environ.get('DATABASE_URL'):
+    raise ImproperlyConfigured('Defina DATABASE_URL no ambiente.')
 
 # Banco de Dados online
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
+        conn_max_age=60,
         ssl_require=True,
         engine='django.db.backends.postgresql',
     )
@@ -139,7 +139,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", 
+        "OPTIONS": {"min_length": 12},
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -217,9 +218,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 # Suas credenciais do portal
-EMAIL_HOST_USER = 'portalalunopi@gmail.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'Portal do Aluno PI <portalalunopi@gmail.com>'
+DEFAULT_FROM_EMAIL =  f'Portal do Aluno PI <{EMAIL_HOST_USER}>'
 
 # le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
 CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
@@ -258,12 +259,29 @@ PASSWORD_RESET_TIMEOUT = 3600
 MEDIA_URL = '/media/' # prefixo de URL usado pra acessar os arquivos enviados, tipo os boletos
 MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam salvos
 
-SECURE_SSL_REDIRECT = not DEBUG # fora do modo de desenvolvimento, obriga o site a usar HTTPS
-SESSION_COOKIE_SECURE = not DEBUG # impede que o cookie de sessão tipo login seja enviado por uma conexão não segura
-CSRF_COOKIE_SECURE = not DEBUG # impede que o cookie de proteção contra CSRF seja enviado por uma conexão não segura
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') # Avisa o Django que a conexão veio segura, mesmo passando pelo Vercel antes
 
+# HTTPS ATIVO INDEPENDENTE DE DEBUG OU VERCEL
 
-SECURE_HSTS_SECONDS = 3600 # tempo em segundos que o navegador vai lembrar de só usar HTTPS 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True # também pra subdomínios 
-SECURE_HSTS_PRELOAD = True # permite que o site seja incluído numa lista pública de sites que só aceitam HTTPS
+FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True') == 'True'
+
+SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
+SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPS
+CSRF_COOKIE_SECURE = FORCE_HTTPS             # cookie CSRF só trafega em HTTPS
+
+# Só confie no cabeçalho do proxy se REALMENTE houver um proxy na frente (Vercel).
+BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'True') == 'True'
+if BEHIND_PROXY:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if FORCE_HTTPS:
+    SECURE_HSTS_SECONDS = int(os.environ.get('HSTS_SECONDS', 3600))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = False   # só vire True depois de subir o HSTS para 1 ano
+
+# reforça cookies e cabeçalhos de segurança
+SESSION_COOKIE_HTTPONLY = True 
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
