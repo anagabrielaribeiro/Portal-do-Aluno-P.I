@@ -36,9 +36,10 @@ def home_view(request):
 
 # usa o ultimo valor que a hospedagem adiciona 
 def obter_ip(request):
+
     xff = request.META.get('HTTP_X_FORWARDED_FOR')
-    # Use [0] para pegar o IP real do usuário, ignorando os proxies do Vercel
-    ip = xff.split(',')[0].strip() if xff else request.META.get('REMOTE_ADDR')
+    ip = xff.split(',')[-1].strip() if xff else request.META.get('REMOTE_ADDR')
+    # se não for um ip valido devolve none, sem erro 500 no log
     try: 
         return str(ipaddress.ip_address(ip))
     except ValueError:
