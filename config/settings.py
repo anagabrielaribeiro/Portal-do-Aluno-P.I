@@ -273,3 +273,11 @@ if FORCE_HTTPS:
     SECURE_HSTS_SECONDS = int(os.environ.get('HSTS_SECONDS', 3600))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = False   # só vire True depois de subir o HSTS para 1 ano
+
+# reforça cookies e cabeçalhos de segurança
+SESSION_COOKIE_HTTPONLY = True 
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
