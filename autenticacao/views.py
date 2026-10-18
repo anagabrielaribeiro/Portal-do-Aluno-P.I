@@ -16,6 +16,10 @@ from django.core.cache import cache
 from django.db.models import F
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
+import logging
+
+# Configuração do logger para capturar falhas de cache sem derrubar o sistema
+logger = logging.getLogger(__name__)
 
 # Quantidade máxima de tentativas de login antes do bloqueio.
 limite_tentativas = 5
@@ -50,9 +54,16 @@ def obter_ip(request):
 
 # Funções Auxiliares 
 
+# Verifica se o IP do cliente atingiu o limite de tentativas falhas e está bloqueado no cache
 def ip_bloqueado(ip):
-    # contador de falhas por IP guardado no cache
-    return bool(ip) and cache.get(f'falhas_ip_{ip}', 0) >= limite_tentativas_ip
+    if not ip:
+        return False
+    try:
+        # contador de falhas por IP guardado no cache
+        return bool(ip) and cache.get(f'falhas_ip_{ip}', 0) >= limite_tentativas_ip
+    except Exception:
+        logger.exception('Cache indisponível ao consultar bloqueio por IP')
+        return False   # O bloqueio por conta continua a proteger o sistema
 
 
 # contar_falha_ip soma 1 a cada falha, ou cria o contador com validade de 15 min para a primeira vez
@@ -63,9 +74,12 @@ def contar_falha_ip(ip):
         return
     chave = f'falhas_ip_{ip}'
     try: 
-        cache.incr(chave)
-    except ValueError: 
-        cache.set(chave,1,tempo_bloqueio *60)
+        try:
+            cache.incr(chave)
+        except ValueError: 
+            cache.set(chave, 1, tempo_bloqueio * 60)
+    except Exception:
+        logger.exception('Cache indisponível ao contar falha por IP')
 
 
 # se a conta tinha bloqueio e o prazo passou, zera o contador e limpa a data
@@ -178,6 +192,7 @@ def concluir_login(request, usuario):
         request.session.pop(chave, None) 
         
     login(request, usuario) # Efetua o login definitivo no Django
+    request.session['otp_ok'] = True
 
     # Atualiza dados de acesso
     usuario.tentativas_login_falha = 0

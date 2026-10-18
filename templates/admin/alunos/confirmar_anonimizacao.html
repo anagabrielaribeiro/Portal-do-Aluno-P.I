@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<p>Tem certeza que deseja anonimizar <strong>{{ aluno.nome }}</strong> (RA {{ aluno.ra }})?
+   Esta ação é <strong>irreversível</strong>.</p>
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="anonimizar_aluno">
+  <input type="hidden" name="_selected_action" value="{{ aluno.pk }}">
+  <input type="hidden" name="confirmar_anonimizacao" value="sim">
+  <input type="hidden" name="select_across" value="0">
+  <input type="hidden" name="index" value="0">
+  <input type="submit" value="Sim, anonimizar">
+  <a href="{% url 'admin:alunos_aluno_changelist' %}" class="button">Cancelar</a>
+</form>
+{% endblock %}

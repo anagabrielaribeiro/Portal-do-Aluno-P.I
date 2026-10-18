@@ -13,4 +13,4 @@ def minha_agenda(request):
     return render(request, 'agenda/agenda.html', {'tarefas': tarefas_pendentes})
 
 
-# testando o banco
+# cria branch de ajustes de Auditoria

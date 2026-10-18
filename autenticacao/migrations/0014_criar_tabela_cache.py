@@ -3,7 +3,11 @@ from django.core.management import call_command
 from django.db import migrations
 
 def criar_tabela(apps, schema_editor):
-    call_command('createcachetable')        # cria a tabela de cache (se já existir, pula)
+    call_command(
+        'createcachetable',
+        database=schema_editor.connection.alias,
+        verbosity=0,
+    )        # cria a tabela de cache (se já existir, pula)
 
 class Migration(migrations.Migration):
 
@@ -12,4 +16,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(criar_tabela, migrations.RunPython.noop),
     ]

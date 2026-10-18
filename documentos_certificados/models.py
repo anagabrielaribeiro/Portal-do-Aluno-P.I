@@ -1,5 +1,5 @@
 from django.db import models
-
+from .validators import caminho_certificado, validar_arquivo_certificado
 class TipoDocumento(models.TextChoices):
     ATESTADO = 'atestado', 'Atestado de Matrícula'
     HISTORICO = 'historico', 'Histórico Escolar'
@@ -30,7 +30,7 @@ class Certificado(models.Model):
     titulo = models.CharField(max_length=200, help_text="Ex: Curso de Python Avançado")
     descricao = models.TextField(blank=True, null=True, help_text="Detalhes ou carga horária do evento")
     data = models.DateField(help_text="Data de conclusão ou do evento")
-    arquivo = models.FileField(upload_to='certificados/')
+    arquivo = models.FileField(upload_to=caminho_certificado,validators=[validar_arquivo_certificado],)
     data_envio = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -1,6 +1,7 @@
 from cryptography.fernet import Fernet 
 from django.conf import settings
 from django.db import models
+from django.core.exceptions import ImproperlyConfigured
 
 
 if not settings.CHAVE_CRIPTOGRAFIA:

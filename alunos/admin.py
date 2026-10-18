@@ -2,6 +2,8 @@ from django.contrib import admin, messages
 from autenticacao.models import LogAuditoria
 from autenticacao.views import obter_ip
 from .models import Aluno
+from django.db import transaction
+from django.template.response import TemplateResponse
 
 
 # ferramente interna da instituição usa pra criar, editar e gerecianr dados
@@ -38,7 +40,7 @@ class AlunoAdmin(admin.ModelAdmin):
 
 
     # @admin.action define o texto que aparece no menu suspenso pra essa ação
-    @admin.action(description='Anonimizar dados pessoais do aluno')
+    @admin.action(description='Anonimizar dados pessoais do aluno', permissions=['anonimizar'])
     def anonimizar_aluno(self, request, queryset): 
         
         # anonimiza um aluno por vez
@@ -48,19 +50,31 @@ class AlunoAdmin(admin.ModelAdmin):
 
         aluno = queryset.first()
         if aluno.dados_anonimizados:
-            self.message_user(request, 'Este aluno já foi anonimizado', message.WARNING)
+            self.message_user(request, 'Este aluno já foi anonimizado', messages.WARNING)
             return
 
-        aluno.anonimizar()    
+        # mostra a tela pedindo confirmação
+        if request.POST.get('confirmar_anonimizacao') != 'sim':
+            contexto = {
+                **self.admin_site.each_context(request),
+                'title': 'Confirmar anonimização',
+                'opts': self.model._meta,
+                'aluno': aluno,
+            }
+            return TemplateResponse(request, 'admin/alunos/confirmar_anonimizacao.html', contexto)        
+        
+        # só anonimiza se tiver a segunda confirmação aplica a anonimização
+        with transaction.atomic():
+            aluno.anonimizar()    
 
-        LogAuditoria.objects.create(
-            usuario= request.user,
-            acao= LogAuditoria.Acao.ANONIMIZACAO,
-            risco= LogAuditoria.Risco.CRITICO,
-            ip_origem= obter_ip(request),
-            detalhes= f'Aluno id {aluno.pk} anonimizado'
-        )
+            LogAuditoria.objects.create(
+                usuario= request.user,
+                acao= LogAuditoria.Acao.ANONIMIZACAO,
+                risco= LogAuditoria.Risco.CRITICO,
+                ip_origem= obter_ip(request),
+                detalhes= f'Aluno id {aluno.pk} anonimizado'
+            )
 
-        self;message_user(request, 'Aluno anonimizado com sucesso', messages.SUCCESS)
+        self.message_user(request, 'Aluno anonimizado com sucesso', messages.SUCCESS)
 
 admin.site.register(Aluno, AlunoAdmin)

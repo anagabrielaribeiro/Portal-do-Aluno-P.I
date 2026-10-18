@@ -41,10 +41,11 @@ ALLOWED_HOSTS = [
 ]
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    "config.apps.PortalAdminConfig", # usar a classe customizada e não o django.contrib.admin
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -245,6 +246,11 @@ LOGGING = {
     },
     'loggers': {
         'recuperacao_senha': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'autenticacao': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
