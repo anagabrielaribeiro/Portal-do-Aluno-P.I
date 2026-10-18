@@ -11,3 +11,6 @@ def minha_agenda(request):
     tarefas_pendentes = Tarefa.objects.filter(aluno=request.user.aluno, concluida=False).order_by('-data_criacao')
     
     return render(request, 'agenda/agenda.html', {'tarefas': tarefas_pendentes})
+
+
+# teste
