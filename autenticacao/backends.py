@@ -7,7 +7,7 @@ class EmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         if not username or not password:
             return None
-        
+        # teste
         # busca insensivel a maiúsculas/minúsculas
         # [:2] busca no máximo dois
         usuarios = list(Usuario.objects.filter(email__iexact=username.strip())[:2])
