@@ -173,33 +173,20 @@ def registrar_falha_2fa (request, usuario):
 
 # executa depois que o usuario acerta o codigo 2fa 
 def concluir_login(request, usuario):
-    tipo = request.session.get('tipo_login')
-    limpar_pendente(request) # apaga as chaves teporarias 
-    login(request, usuario) # função do Django
+    # limpa os dados temporarios da sessão de login
+    for chave in ('usuario_pendente_id', 'pendente_desde', 'tipo_login'):
+        request.session.pop(chave, None) 
+        
+    login(request, usuario) # Efetua o login definitivo no Django
 
-    # marca na sessão que este login passou pelo 2FA
-    request.session['dois_fatores_ok'] = True
-
-    # busca se exite perfil vinculado, e cria um um registro na auditoria de quem entrou
-    aluno = getattr(usuario, 'aluno', None)
-    LogAutenticacao.objects.create(
-        usuario=usuario,
-        ra_registrado=getattr(aluno, 'ra', ''),
-        ip= obter_ip(request)
-    )
-
-
-    # zera as falhas só aqui, depois do 2fa conluído 
-    Usuario.objects.filter(pk=usuario.pk).update(
-        tentativas_login_falha=0,
-        bloqueio_ate=None,
-        ultimo_login=timezone.now(),
-        ultimo_ip_acesso=obter_ip(request),
-    )
- 
-    # se for colaborador, redirecionado para a gestão
-    if tipo == 'colaborador':
-        return redirect('/gestao-portal/')
+    # Atualiza dados de acesso
+    usuario.tentativas_login_falha = 0
+    usuario.bloqueio_ate = None
+    usuario.ultimo_login = timezone.now()
+    usuario.ultimo_ip_acesso = obter_ip(request)
+    usuario.save(update_fields=['tentativas_login_falha', 'bloqueio_ate', 'ultimo_login', 'ultimo_ip_acesso'])
+   
+    # Redirecionamento direto e seguro para o dashboard do aluno
     return redirect('dashboard')
 
 
