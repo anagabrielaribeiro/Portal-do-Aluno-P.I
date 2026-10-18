@@ -24,31 +24,37 @@
 <body>
 
     {#  pop-up de termos, agora aparece em toda página que usa o base.html #}
-    {% if mostrar_popup %}
-    <div class="popup-overlay">
-        <div class="popup-caixa">
-            <h3>Uso dos seus dados pessoais</h3>
-            <p>
-                O Portal do Aluno P.I. coleta e utiliza seus dados pessoais estritamente
-                para as finalidades abaixo, conforme a Lei Geral de Proteção de Dados (LGPD):
-            </p>
-            <ul>
-                {% for f in finalidades %}
-                <li>{{ f }}</li>
-                {% endfor %}
-            </ul>
-            <p>
-                Você pode revogar este consentimento a qualquer momento na tela de
-                "Meus consentimentos", exceto para dados exigidos por obrigação legal
-                (como CPF para matrícula).
-            </p>
-            <form method="post" action="{% url 'aceitar_termos' %}">
-                {% csrf_token %}
-                <button type="submit">Li e concordo</button>
-            </form>
-        </div>
+   {% if mostrar_popup %}
+<div class="popup-overlay">
+    <div class="popup-caixa">
+        <h3>Uso dos seus dados pessoais</h3>
+        <p>
+            O Portal do Aluno P.I. coleta e utiliza seus dados pessoais conforme a
+            Lei Geral de Proteção de Dados (LGPD).
+        </p>
+
+        <p>Os dados abaixo são tratados por obrigação legal ou para a execução da sua matrícula, e não dependem do seu aceite:</p>
+        <ul>
+            {% for d in obrigatorios %}
+            <li>{{ d.campo }} ({{ d.base_legal }})</li>
+            {% endfor %}
+        </ul>
+
+        <p>Os usos abaixo são opcionais. Marque só os que você autoriza. Se não marcar nenhum, o portal continua funcionando normalmente.</p>
+        <form method="post" action="{% url 'aceitar_termos' %}">
+            {% csrf_token %}
+            {% for f in finalidades %}
+            <label>
+                <input type="checkbox" name="finalidades" value="{{ f }}"> {{ f }}
+            </label><br>
+            {% endfor %}
+
+            <p>Você pode mudar essas escolhas a qualquer momento na tela de "Meus consentimentos".</p>
+            <button type="submit">Salvar minhas escolhas</button>
+        </form>
     </div>
-    {% endif %}
+</div>
+{% endif %}
     
 
     {# estrutura de layout com sidebar, copiada do dashboard.html #}

@@ -8,7 +8,7 @@ def termos_pendentes(request):
     if not request.user.is_authenticated:
         return sem_popup
 
-    # se a sessão ká sabe que o aluno aceitou, não consulta o banco
+    # se a sessão já sabe que o aluno aceitou, não consulta o banco
     if request.session.get('termos_aceitos'):
         return sem_popup
 
@@ -21,7 +21,7 @@ def termos_pendentes(request):
         request.session['termos_aceitos'] = True # guarda para não consultar de novo
         return sem_popup
 
-    return {'mostrar_popup': True, 'finalidades': finalidades_de_consentimento()}
+    return {'mostrar_popup': True, 'finalidades': finalidades_de_consentimento(), 'obrigatorios': dados_obrigatorios(),}
 
 
 def lgpd_context(request):
