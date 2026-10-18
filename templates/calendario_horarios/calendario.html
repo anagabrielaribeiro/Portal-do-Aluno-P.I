@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendário e Horários - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="matriculas-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <span class="matriculas-label" style="display:block; margin-top:12px;">AGENDA ACADÊMICA</span>
+    <h1>Horário de Aulas</h1>
+    <p class="matriculas-descricao">
+        Acompanhe a sua grade horária semanal e o registo de frequência do semestre ativo.
+    </p>
+</div>
+
+{% if matricula_atual %}
+    <div class="historico-matriculas">
+        <h3>Grade Curricular - {{ matricula_atual.periodo_letivo }}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>CÓDIGO</th>
+                    <th>DISCIPLINA</th>
+                    <th>PROFESSOR(A)</th>
+                    <th>LOCAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aula in grade_horaria %}
+                <tr>
+                    <td><strong>{{ aula.codigo }}</strong></td>
+                    <td>{{ aula.disciplina }}</td>
+                    <td>{{ aula.professor }}</td>
+                    <td><span class="badge badge-ativa">{{ aula.sala }}</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">A sua grade horária ainda não foi gerada pela coordenação.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="historico-matriculas" style="margin-top: 40px;">
+        <h3>Registo de Frequência</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>DATA DE REGISTO</th>
+                    <th>TOTAL DE FALTAS</th>
+                    <th>PERCENTUAL DE PRESENÇA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for freq in frequencias %}
+                <tr>
+                    <td>{{ freq.data|date:"d/m/Y" }}</td>
+                    <td>{{ freq.faltas }} faltas</td>
+                    <td>
+                        <span class="badge {% if freq.percentual < 75 %}badge-trancada{% else %}badge-ativa{% endif %}">
+                            {{ freq.percentual }}%
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Nenhum registo de falta processado até ao momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="erro" style="background:#fef2f2; color:#dc2626; padding:16px; border-radius:8px;">
+        Não possui nenhuma matrícula ativa para visualizar a grade horária.
+    </div>
+{% endif %}
+
+{% endblock %}
