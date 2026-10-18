@@ -1,20 +1,33 @@
 from .models import Consentimento
-from .mapeamento import DADOS_PESSOAIS
-# ideia é fazer o pop-up aparecer até o aluno aceitar os termos 
-# mesma lógica da view, checa se o aluno logado ainda não tem nenhu consentimento registrado, e monta a lista de finalidades
-# assim deixa essas duas variaveis disponiveis em qualquer template, sem repetir a lógica da view. 
+from .mapeamento import finalidades_de_consentimento
+# faz o pop-up aparecer até o aluno aceitar os termos, em qualquer página
 
 def termos_pendentes(request):
-    
-    
-    # Verifica se o usuário está logado e se é um aluno
-    if request.user.is_authenticated and hasattr(request.user, 'aluno'):
-        consentimentos = request.user.aluno.consentimentos.all() # Busca os consentimentos que o aluno já aceitou
-        finalidades = sorted(set(d['finalidade'] for d in DADOS_PESSOAIS)) # Cria a lista de finalidades sem repetir nomes
+    sem_popup = {'mostrar_popup': False, 'finalidades': []}
 
-        return {
-            # Mostra o pop-up se o aluno ainda NÃO tiver nenhum consentimento salvo
-            'mostrar_popup': not consentimentos.exists(),
-            'finalidades': finalidades,
-        }
-    return {'mostrar_popup': False, 'finalidades': []}
+    if not request.user.is_authenticated:
+        return sem_popup
+
+    # se a sessão ká sabe que o aluno aceitou, não consulta o banco
+    if request.session.get('termos_aceitos'):
+        return sem_popup
+
+    # colaborador não ve popup
+    aluno = getattr(request.user, 'aluno', None)
+    if aluno is None:
+        return sem_popup
+    
+    if aluno.consentimentos.exists():
+        request.session['termos_aceitos'] = True # guarda para não consultar de novo
+        return sem_popup
+
+    return {'mostrar_popup': True, 'finalidades': finalidades_de_consentimento()}
+
+
+def lgpd_context(request):
+    if not request.user.is_authenticated or getattr(request.user, 'aluno', None) is None:
+        return {'mostrar_popup': False}
+
+    # Lógica para alunos
+    tem_consentimentos = request.user.aluno.consentimentos.exists()
+    return {'mostrar_popup': not tem_consentimentos}
