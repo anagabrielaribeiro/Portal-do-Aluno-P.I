@@ -117,12 +117,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# falha com erro claro se DATABASE_URL não existir, em vez de subir com banco inválido
+if not os.environ.get('DATABASE_URL'):
+    raise ImproperlyConfigured('Defina DATABASE_URL no ambiente.')
 
 # Banco de Dados online
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
+        conn_max_age=60,
         ssl_require=True,
         engine='django.db.backends.postgresql',
     )
