@@ -41,6 +41,7 @@ ALLOWED_HOSTS = [
 ]
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -245,6 +246,11 @@ LOGGING = {
     },
     'loggers': {
         'recuperacao_senha': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'autenticacao': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
