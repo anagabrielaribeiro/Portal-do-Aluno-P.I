@@ -13,4 +13,4 @@ def minha_agenda(request):
     return render(request, 'agenda/agenda.html', {'tarefas': tarefas_pendentes})
 
 
-# teste
+# testando o banco
