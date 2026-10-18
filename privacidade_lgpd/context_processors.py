@@ -1,5 +1,5 @@
 from .models import Consentimento
-from .mapeamento import finalidades_de_consentimento
+from .mapeamento import finalidades_de_consentimento, dados_obrigatorios
 # faz o pop-up aparecer até o aluno aceitar os termos, em qualquer página
 
 def termos_pendentes(request):
