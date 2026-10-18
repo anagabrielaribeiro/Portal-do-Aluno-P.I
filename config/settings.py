@@ -255,12 +255,21 @@ PASSWORD_RESET_TIMEOUT = 3600
 MEDIA_URL = '/media/' # prefixo de URL usado pra acessar os arquivos enviados, tipo os boletos
 MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam salvos
 
-SECURE_SSL_REDIRECT = not DEBUG # fora do modo de desenvolvimento, obriga o site a usar HTTPS
-SESSION_COOKIE_SECURE = not DEBUG # impede que o cookie de sessão tipo login seja enviado por uma conexão não segura
-CSRF_COOKIE_SECURE = not DEBUG # impede que o cookie de proteção contra CSRF seja enviado por uma conexão não segura
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') # Avisa o Django que a conexão veio segura, mesmo passando pelo Vercel antes
 
+# HTTPS ATIVO INDEPENDENTE DE DEBUG OU VERCEL
 
-SECURE_HSTS_SECONDS = 3600 # tempo em segundos que o navegador vai lembrar de só usar HTTPS 
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True # também pra subdomínios 
-SECURE_HSTS_PRELOAD = True # permite que o site seja incluído numa lista pública de sites que só aceitam HTTPS
+FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True') == 'True'
+
+SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
+SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPS
+CSRF_COOKIE_SECURE = FORCE_HTTPS             # cookie CSRF só trafega em HTTPS
+
+# Só confie no cabeçalho do proxy se REALMENTE houver um proxy na frente (Vercel).
+BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'True') == 'True'
+if BEHIND_PROXY:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if FORCE_HTTPS:
+    SECURE_HSTS_SECONDS = int(os.environ.get('HSTS_SECONDS', 3600))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = False   # só vire True depois de subir o HSTS para 1 ano
