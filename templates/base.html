@@ -90,7 +90,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'notas_faltas' %}">
                             <span class="icone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path d="M6 3h9l5 5v13H6z"/>
@@ -123,7 +123,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'minha_agenda' %}">
                             <span class="icone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path d="M4 6h16M4 12h16M4 18h10"/>
@@ -133,7 +133,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'meu_calendario' %}">
                             <span class="icone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <circle cx="12" cy="12" r="9"/>
@@ -155,7 +155,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a href="{% url 'certificados' %}">
                             <span class="icone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <circle cx="12" cy="9" r="5"/>
@@ -166,7 +166,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                       <a href="{% url 'meus_documentos' %}">
                             <span class="icone">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path d="M6 2h9l5 5v15H6z"/>
@@ -200,10 +200,19 @@
                 </ul>
             </nav>
 
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="sidebar-sair">Sair</button>
-            </form>
+            <!-- Botão de Tema Limpo -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                <button id="theme-toggle" title="Alternar Tema" type="button">
+                    <svg id="icone-btn-tema" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+
+                <form method="post" action="{% url 'logout' %}" style="flex: 1; margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="sidebar-sair" style="margin-top: 0 !important;">Sair</button>
+                </form>
+            </div>
         </aside>
 
         <main class="conteudo">
@@ -213,7 +222,7 @@
 
     </div>
     
-
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 
 </html>

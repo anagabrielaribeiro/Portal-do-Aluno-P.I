@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Certificados - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tarefas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="matriculas-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <span class="matriculas-label" style="display:block; margin-top:12px;">CURSOS E EVENTOS</span>
+    <h1>Meus Certificados</h1>
+    <p class="matriculas-descricao">
+        Gerencie seus certificados de eventos internos e anexe certificados de cursos externos para atividades complementares.
+    </p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success" style="margin-top: 16px;">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<!-- Botão de Adicionar Certificado -->
+<button id="btn-novo-certificado" class="btn-nova-tarefa" style="margin-bottom: 32px;">+ Novo certificado</button>
+
+<!-- Formulário de Envio (Oculto inicialmente) -->
+<div id="container-form-certificado" class="card-formulario" style="display: none;">
+    <h3 style="margin-top: 0; margin-bottom: 16px;">Anexar Novo Certificado</h3>
+    <form method="post" enctype="multipart/form-data" class="form-tarefa">
+        {% csrf_token %}
+
+        <label class="rotulo-custom">Título do Certificado</label>
+        {{ form.titulo }}
+
+        <label class="rotulo-custom">Descrição / Detalhes</label>
+        {{ form.descricao }}
+
+        <label class="rotulo-custom">Data de Conclusão</label>
+        {{ form.data }}
+
+        <label class="rotulo-custom">Arquivo PDF/Imagem</label>
+        {{ form.arquivo }}
+
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button type="submit">Salvar Certificado</button>
+            <button type="button" id="btn-cancelar" style="background: transparent; color: #DC2626; border: 1px solid #DC2626;">Cancelar</button>
+        </div>
+    </form>
+</div>
+
+<!-- Lógica para abrir/fechar o formulário -->
+<script>
+    document.getElementById('btn-novo-certificado').addEventListener('click', function() {
+        document.getElementById('container-form-certificado').style.display = 'block';
+        this.style.display = 'none';
+    });
+    
+    document.getElementById('btn-cancelar').addEventListener('click', function() {
+        document.getElementById('container-form-certificado').style.display = 'none';
+        document.getElementById('btn-novo-certificado').style.display = 'inline-block';
+    });
+</script>
+
+<!-- Tabela de Certificados -->
+<div class="historico-matriculas" style="margin-top: 32px;">
+    <h3>Certificados Salvos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>TÍTULO</th>
+                <th>DESCRIÇÃO</th>
+                <th>DATA</th>
+                <th>ARQUIVO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cert in certificados %}
+            <tr>
+                <td><strong>{{ cert.titulo }}</strong></td>
+                <td>{{ cert.descricao|default:"-" }}</td>
+                <td>{{ cert.data|date:"d/m/Y" }}</td>
+                <td>
+                    {% if cert.arquivo %}
+                        <a href="{{ cert.arquivo.url }}" style="color: #7C3AED; font-weight: 600; text-decoration: none;" target="_blank">Ver anexo</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Você ainda não possui nenhum certificado anexado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -29,7 +29,10 @@ urlpatterns = [
     path('privacidade/', include('privacidade_lgpd.urls')),
     path('financeiro/', include('financeiro.urls')),
     path('tarefas/', include('tarefas.urls')),
-    path('calendario/', include('calendario_horarios.urls')), # Adiciona esta linha
+    path('calendario/', include('calendario_horarios.urls')),
+    path('docs-certificados/', include('documentos_certificados.urls')),
+    path('agenda/', include('agenda.urls')),
+    path('notas/', include('notas.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

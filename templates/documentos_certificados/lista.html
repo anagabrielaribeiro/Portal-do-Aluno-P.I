@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Documentos e Certificados - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+    <style>
+        .btn-solicitar {
+            background: #7C3AED;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-solicitar:hover {
+            background: #6D28D9;
+        }
+        .link-baixar {
+            color: #7C3AED;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .link-baixar:hover {
+            text-decoration: underline;
+        }
+        
+        /* CORES DO PAINEL AUTOMÁTICO (CLARO) */
+        .painel-auto {
+            background-color: #F5F3FF;
+            border: 1px solid #7C3AED;
+        }
+        .painel-auto h3 { color: #4C1D95; }
+        .painel-auto p { color: #5B21B6; }
+
+        /* CORES DO PAINEL MANUAL (CLARO) */
+        .painel-manual {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+        }
+        .painel-manual h3 { color: #111827; }
+        .painel-manual p { color: #6B7280; }
+
+        /* ======================================================== */
+        /* REGRAS EXCLUSIVAS PARA O TEMA ESCURO                     */
+        /* ======================================================== */
+        
+        /* Painel Automático (Escuro) */
+        [data-theme="dark"] .painel-auto {
+            background-color: rgba(124, 58, 237, 0.15) !important; /* Roxo escuro translúcido */
+            border-color: #7C3AED !important;
+        }
+        [data-theme="dark"] .painel-auto h3,
+        [data-theme="dark"] .painel-auto p {
+            color: #EDE4FD !important; /* Texto roxo bem claro */
+        }
+
+        /* Painel Manual (Escuro) */
+        [data-theme="dark"] .painel-manual {
+            background-color: var(--bg-sidebar) !important;
+            border-color: var(--border-color) !important;
+        }
+        [data-theme="dark"] .painel-manual h3,
+        [data-theme="dark"] .painel-manual p {
+            color: var(--text-main) !important;
+        }
+        [data-theme="dark"] .painel-manual select {
+            background-color: var(--bg-body) !important;
+            color: var(--text-main) !important;
+            border-color: var(--border-color) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="matriculas-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <span class="matriculas-label" style="display:block; margin-top:12px;">SECRETARIA VIRTUAL</span>
+    <h1>Documentos e Certificados</h1>
+    <p class="matriculas-descricao">
+        Solicite declarações de vínculo e baixe seus certificados oficiais emitidos pela instituição.
+    </p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="success" style="margin-top: 16px; border-radius: 8px; padding: 12px; background: #F0FDF4; color: #16A34A; border: 1px solid #bbf7d0;">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Grid dividindo as áreas de Autoatendimento e Secretaria -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 32px;">
+    
+    <!-- Painel de Documentos Automáticos -->
+    <div class="painel-auto" style="border-radius: 12px; padding: 24px; display: flex; flex-direction: column;">
+        <h3 style="margin-top: 0; font-size: 16px;">Documentos de Emissão Imediata</h3>
+        <p style="font-size: 13px; margin-bottom: 24px; flex: 1;">
+            Gere declarações com autenticação digital instantaneamente. Não é necessário abrir solicitação.
+        </p>
+        <a href="{% url 'gerar_declaracao' %}" class="btn-solicitar" style="display: block; text-align: center; text-decoration: none;">
+            ↓ Baixar Atestado de Matrícula
+        </a>
+    </div>
+
+    <!-- Painel de Solicitações Manuais -->
+    <div class="painel-manual" style="border-radius: 12px; padding: 24px; display: flex; flex-direction: column;">
+        <h3 style="margin-top: 0; font-size: 16px;">Solicitações à Secretaria</h3>
+        <p style="font-size: 13px; margin-bottom: 24px; flex: 1;">
+            Para emissão de Histórico Escolar oficial e certificados físicos. Sujeito a prazo de análise.
+        </p>
+        
+        <form method="post" action="{% url 'nova_solicitacao_documento' %}" style="margin: 0;">
+            {% csrf_token %}
+            <select name="tipo" required style="width: 100%; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 12px;">
+                <option value="">Selecione o documento...</option>
+                {% for valor, rotulo in tipos_disponiveis %}
+                    {% if valor != 'atestado' %}
+                        <option value="{{ valor }}">{{ rotulo }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn-solicitar" style="width: 100%; background: #111827;">Abrir Solicitação</button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Tabela de histórico -->
+<div class="historico-matriculas" style="margin-top: 32px;">
+    <h3>Histórico de Solicitações</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>DOCUMENTO</th>
+                <th>DATA DA SOLICITAÇÃO</th>
+                <th>STATUS</th>
+                <th>ARQUIVO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documentos %}
+            <tr>
+                <td><strong>{{ doc.get_tipo_display }}</strong></td>
+                <td>{{ doc.data_solicitacao|date:"d/m/Y" }} às {{ doc.data_solicitacao|time:"H:i" }}</td>
+                <td>
+                    {% if doc.status == 'liberado' %}
+                        <span class="badge badge-ativa">Liberado</span>
+                    {% elif doc.status == 'recusado' %}
+                        <span class="badge badge-trancada">Recusado</span>
+                    {% else %}
+                        <span class="badge badge-cancelada">Em análise</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if doc.status == 'liberado' and doc.arquivo_gerado %}
+                        <a href="{{ doc.arquivo_gerado.url }}" class="link-baixar" target="_blank" download>Baixar PDF</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Você ainda não possui nenhuma solicitação de documento.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
