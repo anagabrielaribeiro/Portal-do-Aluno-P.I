@@ -192,6 +192,7 @@ def concluir_login(request, usuario):
         request.session.pop(chave, None) 
         
     login(request, usuario) # Efetua o login definitivo no Django
+    request.session['otp_ok'] = True
 
     # Atualiza dados de acesso
     usuario.tentativas_login_falha = 0
