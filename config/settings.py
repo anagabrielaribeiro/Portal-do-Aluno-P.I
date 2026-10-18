@@ -31,7 +31,7 @@ if not SECRET_KEY:
     raise ImproperlyConfigured('Defina DJANGO_SECRET_KEY no ambiente')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS dinâmico que lê da variável de ambiente quando existir
 # caso contrário, usa o padrão seguro com .vercel.app, localhost e 127.0.0.1
