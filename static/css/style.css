@@ -7,15 +7,11 @@ body {
     font-family: Arial, sans-serif;
 }
 
-
 /* Login */
-
 .login-split {
     min-height: 100vh;
     display: flex;
 }
-
-/* Parte do painel da esquerda */
 
 .painel-esquerdo {
     flex: 1;
@@ -93,8 +89,6 @@ body {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.85);
 }
-
-/* Parte do painel da direita */
 
 .painel-direito {
     flex: 1;
@@ -208,8 +202,6 @@ body {
     margin-bottom: 16px;
 }
 
-/* Autentificação 2fa verificar e ativar */
-
 .instrucao-simples {
     color: #4B5563;
     font-size: 14px;
@@ -250,7 +242,6 @@ body {
 }
 
 /* Dashboard */
-
 .app-layout {
     display: flex;
     min-height: 100vh;
@@ -417,25 +408,20 @@ body {
     color: #111827;
 }
 
-/* Parte responsiva */
-
 @media (max-width: 900px) {
     .login-split {
         flex-direction: column;
     }
-
     .marca {
         position: static;
         margin-bottom: 24px;
     }
-
     .painel-esquerdo,
     .painel-direito {
         padding: 32px 24px;
     }
 }
 
-/* link de voltar nas telas de login */
 .voltar-home {
     display: inline-block;
     margin-bottom: 16px;
@@ -446,4 +432,193 @@ body {
 
 .voltar-home:hover {
     color: #DC2626;
+}
+
+
+/* TEMA ESCURO E BOTÃO DE ALTERNÂNCIA */
+:root {
+    --bg-body: #F9FAFB;
+    --bg-sidebar: #FFFFFF;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    --border-color: #E5E7EB;
+    --hover-bg: #F5F3FF;
+}
+
+[data-theme="dark"] {
+    --bg-body: #111827;
+    --bg-sidebar: #1F2937;
+    --text-main: #F9FAFB;
+    --text-muted: #9CA3AF;
+    --border-color: #374151;
+    --hover-bg: #374151;
+}
+
+/* ================= APLICAÇÃO GLOBAL DAS CORES ================= */
+[data-theme="dark"] body, 
+[data-theme="dark"] .app-layout {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .sidebar {
+    background-color: var(--bg-sidebar) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .conteudo-topo h2, 
+[data-theme="dark"] .conteudo-corpo h1, 
+[data-theme="dark"] h1, 
+[data-theme="dark"] h2, 
+[data-theme="dark"] h3, 
+[data-theme="dark"] p,
+[data-theme="dark"] td, 
+[data-theme="dark"] th {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .sidebar-nav a {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .sidebar-nav a:hover {
+    background-color: var(--hover-bg) !important;
+    color: #7C3AED !important;
+}
+
+/* ================= ESTILO DOS BOTÕES DO RODAPÉ (TEMA E SAIR) ================= */
+#theme-toggle, .sidebar-sair {
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    cursor: pointer !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-family: inherit !important;
+    transition: background 0.2s, color 0.2s !important;
+}
+
+#theme-toggle {
+    width: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+}
+
+#theme-toggle:hover, .sidebar-sair:hover {
+    background: var(--hover-bg) !important;
+    color: #7C3AED !important;
+    border-color: #7C3AED !important;
+}
+
+#theme-toggle svg {
+    width: 20px !important;
+    height: 20px !important;
+    display: block !important;
+}
+
+[data-theme="dark"] .sidebar-sair {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .sidebar-sair:hover {
+    background-color: var(--hover-bg) !important;
+    color: #DC2626 !important;
+    border-color: #FECACA !important;
+}
+
+/* ================= CORREÇÕES ESPECÍFICAS DE COMPONENTES ================= */
+[data-theme="dark"] .form-solicitacao {
+    background-color: var(--bg-sidebar) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .form-solicitacao label {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .form-solicitacao select {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .badge {
+    color: #111827 !important;
+}
+
+[data-theme="dark"] table th,
+[data-theme="dark"] table td {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] table tr:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+
+[data-theme="dark"] .cadastro-cards .card {
+    background-color: var(--bg-sidebar) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .cadastro-cards p {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .cadastro-descricao {
+    color: var(--text-muted) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .campo-editavel input {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+
+[data-theme="dark"] .acoes-tarefa .form-apagar button {
+    background: transparent !important;
+    border: none !important;
+    color: #7C3AED !important; /* Mantém a mesma cor roxa do botão Editar */
+    text-decoration: none !important; /* Garante que não tenha sublinhado antes do hover */
+}
+
+[data-theme="dark"] .acoes-tarefa .form-apagar button:hover {
+    color: #EF4444 !important; /* Vermelho claro para o hover no tema escuro */
+    text-decoration: underline !important;
+}
+
+.card-formulario {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.rotulo-custom {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Aplicação no Tema Escuro */
+[data-theme="dark"] .card-formulario {
+    background-color: var(--bg-sidebar) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .rotulo-custom {
+    color: var(--text-main) !important;
 }

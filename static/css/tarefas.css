@@ -46,18 +46,24 @@
     color: #9CA3AF;
 }
 
+.acoes-tarefa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .acoes-tarefa a {
-    margin-left: 10px;
     color: #7C3AED;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 600;
 }
 
 .acoes-tarefa a:hover {
     text-decoration: underline;
 }
 
-.form-tarefa input,
+.form-tarefa input:not([type="checkbox"]),
 .form-tarefa textarea {
     display: block;
     width: 100%;
@@ -67,6 +73,24 @@
     border: 1px solid #D1D5DB;
     border-radius: 8px;
     font-size: 14px;
+}
+
+/* Alinha o checkbox e o texto "Concluída" perfeitamente na mesma linha */
+.form-tarefa label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Garante que o checkbox tenha um tamanho fixo e não ocupe a tela toda */
+.form-tarefa input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
 }
 
 .form-tarefa button {
@@ -84,15 +108,27 @@
 
 .acoes-tarefa .form-apagar {
     display: inline;
+    margin: 0;
 }
 
+/* Transforma o botão visualmente em um link igual ao Editar */
 .acoes-tarefa .form-apagar button {
-    background: none;
+    background: transparent;
     border: none;
     padding: 0;
-    color: inherit;
-    font: inherit;
+    margin: 0;
+    color: #7C3AED;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
+    text-decoration: none;
+    line-height: inherit;
+}
+
+/* Efeito vermelho e sublinhado ao passar o mouse (Tema Claro) */
+.acoes-tarefa .form-apagar button:hover {
+    color: #DC2626;
     text-decoration: underline;
 }
 

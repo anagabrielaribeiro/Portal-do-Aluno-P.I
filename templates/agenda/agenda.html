@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agenda - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/tarefas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="matriculas-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <span class="matriculas-label" style="display:block; margin-top:12px;">ORGANIZAÇÃO</span>
+    <h1>Minha Agenda</h1>
+    <p class="matriculas-descricao">
+        Acompanhe os seus compromissos e tarefas pendentes para o semestre atual.
+    </p>
+</div>
+
+<div class="historico-matriculas" style="margin-top: 32px;">
+    <h3>Próximos Compromissos</h3>
+    {% if tarefas %}
+        <ul class="lista-tarefas">
+            {% for tarefa in tarefas %}
+            <li class="item-tarefa">
+                <span class="titulo-tarefa"><strong>{{ tarefa.titulo }}</strong> - {{ tarefa.data_criacao|date:"d/m/Y" }}</span>
+                <div class="acoes-tarefa">
+                    <a href="{% url 'editar_tarefa' tarefa.pk %}">Resolver Pendência</a>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div style="background:#f0fdf4; color:#16a34a; padding:16px; border-radius:8px; border: 1px solid #bbf7d0;">
+            A sua agenda está livre! Não existem tarefas ou avaliações pendentes.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

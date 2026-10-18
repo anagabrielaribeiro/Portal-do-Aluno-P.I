@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notas e Faltas - Portal do Aluno{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/matricula.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="matriculas-header">
+    <a href="{% url 'dashboard' %}" class="link-voltar">&larr; Voltar ao dashboard</a>
+    <span class="matriculas-label" style="display:block; margin-top:12px;">DESEMPENHO ACADÊMICO</span>
+    <h1>Notas e Faltas</h1>
+    <p class="matriculas-descricao">
+        Acompanhe o seu desempenho nas avaliações e o seu percentual de frequência do semestre ativo.
+    </p>
+</div>
+
+{% if matricula_atual %}
+    <!-- Tabela de Notas -->
+    <div class="historico-matriculas">
+        <h3>Minhas Notas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>TIPO DE AVALIAÇÃO</th>
+                    <th>DATA</th>
+                    <th>NOTA OBTIDA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nota in notas %}
+                <tr>
+                    <td><strong>{{ nota.get_tipo_display }}</strong></td>
+                    <td>{{ nota.data|date:"d/m/Y" }}</td>
+                    <td>
+                        <!-- Fica vermelho se a nota for menor que 6.0, verde se maior -->
+                        <span class="badge {% if nota.nota >= 6 %}badge-ativa{% else %}badge-trancada{% endif %}">
+                            {{ nota.nota }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Nenhuma nota lançada até o momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tabela de Faltas -->
+    <div class="historico-matriculas" style="margin-top: 40px;">
+        <h3>Resumo de Frequência</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>DATA DE LANÇAMENTO</th>
+                    <th>FALTAS REGISTRADAS</th>
+                    <th>PERCENTUAL DE PRESENÇA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for freq in frequencias %}
+                <tr>
+                    <td>{{ freq.data|date:"d/m/Y" }}</td>
+                    <td>{{ freq.faltas }} faltas</td>
+                    <td>
+                        <!-- Fica vermelho se a presença for menor que 75% -->
+                        <span class="badge {% if freq.percentual < 75 %}badge-trancada{% else %}badge-ativa{% endif %}">
+                            {{ freq.percentual }}%
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Nenhum registro de falta processado até o momento.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="erro" style="background:#fef2f2; color:#dc2626; padding:16px; border-radius:8px;">
+        Você não possui matrícula ativa para visualizar notas e faltas.
+    </div>
+{% endif %}
+
+{% endblock %}

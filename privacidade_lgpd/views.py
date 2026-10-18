@@ -88,34 +88,40 @@ def revogar_consentimento(request, consentimento_id):
 def exportar_dados_json(request):
     aluno = request.user.aluno
     
-    # pede a senha de nov, para baixar por conta dos dados pessoais no arquivo
     if not request.user.check_password(request.POST.get('senha', '')):
         messages.error(request, 'Senha incorreta')
         return redirect('meus_consentimentos')
 
-    lista_matriculas = []
-    for m in aluno.matriculas.select_related('curso'):
-        lista_matriculas.append({
-            'codigo': m.codigo,  
-            'curso': m.curso.nome,
-            'status': m.get_status_display(),
-            'periodo_letivo': m.periodo_letivo,
-            'data_matricula': m.data_matricula,
-        })
+    # Dados da vida acadêmica (Matrículas)
+    lista_matriculas = [{
+        'codigo': m.codigo,  
+        'curso': m.curso.nome,
+        'status': m.get_status_display(),
+        'periodo_letivo': m.periodo_letivo,
+        'data_matricula': m.data_matricula,
+    } for m in aluno.matriculas.select_related('curso')]
 
-    lista_consentimentos = []
-    for c in aluno.consentimentos.all():
-        lista_consentimentos.append({
-            'finalidade': c.finalidade,
-            'aceito': c.aceito,
-            'versao_termo': c.versao_termo,
-            'data_registro': c.data_registro,
-            'data_revogacao': c.data_revogacao,
-        })
-        
-    lista_pedidos = []
-    for p in aluno.solicitacoes_exclusao.all():
-        lista_pedidos.append({'data_pedido': p.data_pedido, 'status': p.get_status_display()})
+    # Consentimentos LGPD
+    lista_consentimentos = [{
+        'finalidade': c.finalidade,
+        'aceito': c.aceito,
+        'versao_termo': c.versao_termo,
+        'data_registro': c.data_registro,
+        'data_revogacao': c.data_revogacao,
+    } for c in aluno.consentimentos.all()]
+    
+    # Solicitações de Exclusão
+    lista_pedidos = [{'data_pedido': p.data_pedido, 'status': p.get_status_display()} for p in aluno.solicitacoes_exclusao.all()]
+    
+    # Boletos (Financeiro)
+    lista_boletos = [{'referencia': b.mes_referencia, 'valor': float(b.valor), 'pago': b.pago, 'vencimento': b.vencimento} for b in aluno.boletos.all()]
+    
+    # Tarefas (Agenda)
+    lista_tarefas = [{'titulo': t.titulo, 'concluida': t.concluida, 'data': t.data_criacao} for t in aluno.tarefas.all()]
+    
+    # Documentos e Certificados
+    lista_docs = [{'tipo': d.get_tipo_display(), 'status': d.get_status_display(), 'data': d.data_solicitacao} for d in aluno.documentos_solicitados.all()]
+    lista_certs = [{'titulo': c.titulo, 'data': c.data} for c in aluno.certificados.all()]
             
     dados = {
         'identificacao':{
@@ -132,18 +138,18 @@ def exportar_dados_json(request):
             'email': request.user.email,
             'telefone': aluno.telefone,
             'endereco': aluno.endereco,
-            },
+        },
         'acesso': {'ultimo_ip_acesso': request.user.ultimo_ip_acesso},
-            'vida_academica': lista_matriculas,
-            'consentimentos': lista_consentimentos,
-            'solicitacoes_de_exclusao': lista_pedidos,
-            # colocar notas, boletos e calendarios seguindo o mesmo padrão
-        }
+        'vida_academica': lista_matriculas,
+        'financeiro': lista_boletos,
+        'tarefas_pessoais': lista_tarefas,
+        'documentos_institucionais': lista_docs,
+        'certificados_enviados': lista_certs,
+        'consentimentos': lista_consentimentos,
+        'solicitacoes_de_exclusao': lista_pedidos,
+    }
 
-    # Converte o dicionário para JSON estruturado.
-    # ensure_ascii=False permite acentuação (como "São Paulo"). indent=4 deixa o arquivo bonito para leitura.
     response = JsonResponse(dados, json_dumps_params={'ensure_ascii': False, 'indent': 4})
-    # Esse comando avisa ao navegador que não é para exibir a tela, e sim para baixar um arquivo.
     response['Content-Disposition'] = 'attachment; filename="meus_dados_portal_pi.json"'
     
     return response
