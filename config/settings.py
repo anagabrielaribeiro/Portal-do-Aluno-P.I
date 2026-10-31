@@ -201,7 +201,7 @@ STORAGES = {
 
 # Deixamos o PBKDF2 explícito aqui por ser a recomendação da OWASP contra ataques de força bruta.
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",     # É o principal, que o Django vai usar pra encriptar (fazer o hash) das senhas novas.
+    "config.hashers.PBKDF2CustoDefinido",    # PBKDF2 com número de iterações definido por nós (config/hashers.py)
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",     # Os próximos ficam apenas de "reserva" caso o sistema precise ler alguma senha antiga que tenha sido salva com outro padrão antes.
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
