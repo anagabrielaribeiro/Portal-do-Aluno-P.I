@@ -127,7 +127,7 @@ if not os.environ.get('DATABASE_URL'):
 # Banco de Dados online
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
+        default=os.environ.get('DATABASE_URL'), 
         conn_max_age=60,
         ssl_require=True,
         engine='django.db.backends.postgresql',
@@ -273,13 +273,15 @@ MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam 
 FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True') == 'True'
 
 SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
-SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPS
+SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPs
 CSRF_COOKIE_SECURE = FORCE_HTTPS             # cookie CSRF só trafega em HTTPS
 
 # Só confie no cabeçalho do proxy se REALMENTE houver um proxy na frente (Vercel).
 BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'True') == 'True'
 if BEHIND_PROXY:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+PROXIES_CONFIAVEIS = int(os.environ.get('PROXIES_CONFIAVEIS', 1))
 
 if FORCE_HTTPS:
     SECURE_HSTS_SECONDS = int(os.environ.get('HSTS_SECONDS', 3600))

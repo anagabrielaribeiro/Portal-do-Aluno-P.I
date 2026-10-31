@@ -17,6 +17,7 @@ from django.db.models import F
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 import logging
+from django.conf import settings  
 
 # Configuração do logger para capturar falhas de cache sem derrubar o sistema
 logger = logging.getLogger(__name__)
@@ -38,18 +39,23 @@ def home_view(request):
     return render(request, 'autenticacao/home.html')  # o caminho do seu template
 
 
-# usa o ultimo valor que a hospedagem adiciona 
+# o X-Forwarded-For só vale quando existe um proxy nosso na frente
+# cada proxy confiavel anex no fim da lista o IP de quem falou com ele, então
+# contamos da direita para a esquerd o que vem antes disso o cliente pode forja
 def obter_ip(request):
+    ip = request.META.get('REMOTE_ADDR')
 
-    xff = request.META.get('HTTP_X_FORWARDED_FOR')
-    ip = xff.split(',')[-1].strip() if xff else request.META.get('REMOTE_ADDR')
+    if settings.BEHIND_PROXY:
+        xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+        cadeia = [parte.strip() for parte in xff.split(',') if parte.strip()]
+        n = settings.PROXIES_CONFIAVEIS
+        if n >= 1 and len(cadeia) >= n:
+            ip = cadeia[-n]
     # se não for um ip valido devolve none, sem erro 500 no log
-    try: 
+    try:
         return str(ipaddress.ip_address(ip))
     except ValueError:
         return None
-
-
 
 
 # Funções Auxiliares 
