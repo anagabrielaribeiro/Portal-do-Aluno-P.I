@@ -48,12 +48,12 @@ class Usuario(AbstractUser):
 
     # chave secreta usada pela biblioteca pyotp gerar e conferir os 2f
     # ela é criada uma vez só, no login, e fica guardada para usar no proximo
-    chave_2fa = models.CharField(
+    chave_2fa = CampoCriptografado(
     max_length=255,
     null=True,
     blank=True,
     help_text='chave secreta usada para gerar os códigos do autenticador'
-    )
+)
 
     # esse método responde se o usuario está bloqueado agora
     # se não tiver nenhuma data de bloqueio salva, retorna False 
