@@ -70,11 +70,19 @@ class Usuario(AbstractUser):
         db_table = 'auth_user'
 
 
+class QuerySetLogImutavel(models.QuerySet):
+
+    def update(self, **kwargs):
+        raise ValueError('Logs não podem ser alterados')
+
+    def bulk_update(self, objs, fields, batch_size=None):
+        raise ValueError('Logs não podem ser alterados')
+
+    def delete(self):
+        raise ValueError('Logs não podem ser excluídos')
+
+
 class LogAuditoria(models.Model):
-    """
-    Tabela para registrar os logs de segurança e auditoria (Atividade 5.2).
-    Guarda quem tentou acessar, o que deu errado, o nível de risco e o IP.
-    """
 
     class Acao(models.TextChoices):
         LOGIN_FALHO = 'login_falho', 'Falha na Senha'
@@ -102,6 +110,7 @@ class LogAuditoria(models.Model):
     ip_origem = models.GenericIPAddressField(null=True, blank=True, help_text="IP de onde veio a tentativa")
     detalhes = models.TextField(blank=True, null=True, help_text="Detalhes extras do evento")
     data_hora = models.DateTimeField(auto_now_add=True) # Preenche sozinho com a hora do servidor
+    objects = QuerySetLogImutavel.as_manager()
 
 
     def save(self, *args, **kwargs):
