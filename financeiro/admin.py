@@ -25,7 +25,7 @@ class BoletoAdmin(admin.ModelAdmin):
     def _pode_gerir(self, request):
         # só superusuario
         u = request.user
-        return u.is_superuser or u.groups.filter(name='Financeiro').existis()
+        return u.is_superuser or u.groups.filter(name='Financeiro').exists()
 
     
     def has_add_permission(self, request):
@@ -43,7 +43,7 @@ class BoletoAdmin(admin.ModelAdmin):
         # se for edição e o pago mudou, guarda historic quem mudoi
         if change and 'pago' in form.changed_data:
             HistoricoPagamento.objects.create(
-                Boleto=obj,
+                boleto=obj,
                 usuario=request.user,
                 pago_anterior=not obj.pago, 
                 pago_novo=obj.pago,
