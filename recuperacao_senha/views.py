@@ -8,6 +8,9 @@ import smtplib
 from django.core.cache import cache
 from django.shortcuts import render, redirect
 from autenticacao.views import obter_ip
+from django.contrib.auth.forms import PasswordResetForm 
+from django.core.mail import EmailMultiAlternatives  
+from django.template import loader  
 
 
 
@@ -27,6 +30,39 @@ def _mascarar_email(email):
     return f"{usuario[:1]}***@{dominio}"
 
 
+# o Django 6.1 esconde os erros de envio do e-mail de recuperação, então a gente não ficava sabendo
+# quando o SMTP falhava. Por isso o envio é feito aqui, para poder registrar se deu certo ou não
+class FormularioRecuperacao(PasswordResetForm):
+
+    # o Django chama esse método sozinho, só quando existe um usuário com o e-mail digitado
+    def send_mail(self, subject_template_name, email_template_name, context,
+                  from_email, to_email, html_email_template_name=None):
+
+        # monta o assunto (sem quebra de linha, e-mail não aceita) e o texto do e-mail
+        assunto = "".join(loader.render_to_string(subject_template_name, context).splitlines())
+        corpo = loader.render_to_string(email_template_name, context)
+
+        # cria a mensagem com remetente e destinatário
+        mensagem = EmailMultiAlternatives(assunto, corpo, from_email, [to_email])
+
+        # se existir uma versão em HTML do e-mail, anexa junto
+        if html_email_template_name is not None:
+            mensagem.attach_alternative(loader.render_to_string(html_email_template_name, context), "text/html")
+
+        try:
+            # entrega a mensagem para o servidor de e-mail 
+            mensagem.send()
+        except Exception as erro:
+            # deu erro: grava a falha no log (com o e-mail mascarado) e para por aqui.
+            # a tela continua igual para o usuário, para não mostrar se o e-mail existe ou não
+            logger.error(f"FALHA: não foi possível enviar o e-mail de recuperação ({type(erro).__name__}, e-mail={_mascarar_email(to_email)})")
+            return
+
+        # o servidor de e-mail aceitou a mensagem, então grava o sucesso
+        logger.info(f"SUCESSO: e-mail de recuperação entregue ao servidor SMTP (e-mail={_mascarar_email(to_email)})")
+
+
+
 # controla o limite de tentativas usando o cache para evitar ataques de força bruta
 def _estourou_limite(chave, limite):
     total = cache.get(chave, 0) + 1
@@ -44,6 +80,7 @@ class RecuperarSenhaView(auth_views.PasswordResetView):
     # Exibe o formulário de solicitação de e-mail e dispara o link seguro gerado pelo Django
     template_name = 'recuperacao_senha/password_reset_form.html'
     email_template_name = 'recuperacao_senha/password_reset_email.html'
+    form_class = FormularioRecuperacao
 
     def form_valid(self, form):
         email = form.cleaned_data.get('email').strip().lower() 
@@ -91,7 +128,7 @@ class ConfirmarNovaSenhaView(auth_views.PasswordResetConfirmView):
 
         
         resposta = super().form_valid(form)
-        logger.info(f'SUCESSO: Senha redefinida e validaada com sucesso pelo token de acesso' f"(usuario_id={usuario.pk}, ip={obter_ip(self.request)})")
+        logger.info(f"SUCESSO: senha redefinida pelo link do e-mail (usuario_id={usuario.pk}, ip={obter_ip(self.request)})")
         return resposta
 
 
