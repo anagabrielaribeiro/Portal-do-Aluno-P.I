@@ -146,6 +146,8 @@ class LogAutenticacao(models.Model):
     ip = models.GenericIPAddressField(null=True, blank=True) # ip de quem fez login
     data_hora = models.DateTimeField(default=timezone.now)
 
+    objects = QuerySetLogImutavel.as_manager()  # update() e delete() em queryset passam a ser recusados
+
     class Meta:
         ordering = ['id'] # ordena os logs pela ordem em que foram criados
 
