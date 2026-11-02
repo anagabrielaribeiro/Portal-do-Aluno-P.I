@@ -270,7 +270,10 @@ MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam 
 
 # HTTPS ATIVO INDEPENDENTE DE DEBUG OU VERCEL
 
-FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True') == 'True'
+FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True').strip().lower() not in ('false', '0', 'no') # "false" explícito desliga o HTTPS
+#  na vercel o HTTPS não pode ficar desligado
+if os.environ.get('VERCEL') and not FORCE_HTTPS: 
+    raise ImproperlyConfigured('FORCE_HTTPS não pode ser desligado na Vercel')
 
 SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
 SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPs
