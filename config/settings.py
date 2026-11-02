@@ -227,6 +227,11 @@ DEFAULT_FROM_EMAIL =  f'Portal do Aluno PI <{EMAIL_HOST_USER}>'
 
 # le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
 CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
+# chaves antigas, só servem para ler dados que ainda estão cifrados com elas durante uma rotação
+CHAVES_CRIPTOGRAFIA_ANTIGAS = [
+    chave.strip() for chave in os.getenv('CHAVES_CRIPTOGRAFIA_ANTIGAS', '').split(',') if chave.strip()
+]
+
 CHAVE_HASH_CPF = os.environ.get('CHAVE_HASH_CPF') 
 
 # Configuração de Logs de Auditoria (Seguro para Servidores em Nuvem / Vercel)
@@ -269,11 +274,12 @@ MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam 
 
 
 # HTTPS ATIVO INDEPENDENTE DE DEBUG OU VERCEL
-
 FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True').strip().lower() not in ('false', '0', 'no') # "false" explícito desliga o HTTPS
 #  na vercel o HTTPS não pode ficar desligado
 if os.environ.get('VERCEL') and not FORCE_HTTPS: 
     raise ImproperlyConfigured('FORCE_HTTPS não pode ser desligado na Vercel')
+
+
 
 SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
 SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPs
