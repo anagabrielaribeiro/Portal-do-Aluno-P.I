@@ -1,10 +1,13 @@
 # lista os dados pessoais que o sistema guarda, pra que servem e em que base legal da LGPD cada um se apoia
-# base_legal 'consentimento' = o aluno escolhe se aceita as outras não dependem do aceite dele
-# necessidade = por que o dado precisa existir
+# base_legal 'consentimento' = o aluno escolhe se aceita, as outras não dependem do aceite dele
+# necessidade = por que o dado precisa existir (princípio da minimização)
 # retencao = por quanto tempo fica guardado e o que acontece depois
 
+
+# nomes das finalidades que dependem do aceite
 FINALIDADE_TELEFONE = 'contato por telefone'
 FINALIDADE_COMUNICADOS = 'envio de avisos e comunicados'
+
 
 DADOS_PESSOAIS = [
     {'campo': 'nome', 'app': 'alunos', 'finalidade': 'identificação escolar',
@@ -116,4 +119,3 @@ def finalidades_de_consentimento():
 
 def dados_obrigatorios():
     return [d for d in DADOS_PESSOAIS if d['base_legal'] != 'consentimento']
-
