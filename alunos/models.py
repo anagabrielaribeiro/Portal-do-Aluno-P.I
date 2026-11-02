@@ -61,6 +61,7 @@ class Aluno(models.Model):
 
     # função para anonimizar os dados por completo
     def anonimizar(self):
+        arquivos_para_apagar = []  # arquivos só são apagados depois que o banco confirmar tudo
         with transaction.atomic() : # ou faz tudo ou não faz nada  
             self.nome = 'Aluno anonimizado'
             self.nome_social = None
@@ -80,7 +81,35 @@ class Aluno(models.Model):
             usuario.is_active = False
             usuario.chave_2fa = None
             usuario.autentificacao_dois_fatores = False
+            usuario.first_name = ''  
+            usuario.last_name = ''
+            usuario.ultimo_ip_acesso = None  
+            usuario.set_unusable_password()  
             usuario.save()
+
+            
+            self.tarefas.all().delete()  # texto livre da agenda pessoal
+
+            for certificado in self.certificados.all():
+                arquivos_para_apagar.append((certificado.arquivo.storage, certificado.arquivo.name))
+            self.certificados.all().delete()
+
+            # o registro do pedido de documento fica, mas o arquivo gerado é apagado
+            for documento in self.documentos_solicitados.exclude(arquivo_gerado=''):
+                if documento.arquivo_gerado:
+                    arquivos_para_apagar.append((documento.arquivo_gerado.storage, documento.arquivo_gerado.name))
+                    documento.arquivo_gerado = None
+                    documento.save(update_fields=['arquivo_gerado'])
+
+            # o pedido de exclusão deste aluno passa a concluído
+            self.solicitacoes_exclusao.filter(status='pendente').update(status='concluida')
+
+            # só apaga os arquivos se a transação inteira der certo
+            def apagar_arquivos():
+                for storage, nome in arquivos_para_apagar:
+                    if nome:
+                        storage.delete(nome)
+            transaction.on_commit(apagar_arquivos)
 
 
     def clean_fields(self, exclude=None):

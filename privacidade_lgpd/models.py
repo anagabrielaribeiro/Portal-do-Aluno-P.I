@@ -35,3 +35,8 @@ class SolicitacaoExclusao (models.Model):
     data_pedido =models.DateTimeField(auto_now_add=True) # quando o aluno pediu
     status = models.CharField(max_length=10, choices=STATUS, default='pendente') # muda no admin 
 
+
+# ponto único para perguntar se pode usar este dado para esta finalidade
+# revogado ou recusado = não pode
+def tem_consentimento(aluno, finalidade):
+    return aluno.consentimentos.filter(finalidade=finalidade, aceito=True).exists()

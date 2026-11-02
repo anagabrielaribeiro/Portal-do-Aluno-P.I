@@ -176,7 +176,7 @@ def solicitar_exclusao(request):
             from_email = None,
             recipient_list = [request.user.email],
         )
-        menssages.sucess(request, f'Pedido registrado (protocolo {pedido.id}). Enviamos uma confirmação para o email')
+        messages.success(request, f'Pedido registrado (protocolo {pedido.id}). Enviamos uma confirmação para o email')
     except Exception:
         # o pedido já está salvo então o erro não da problema na pagina
         messages.warning(request, f"Pedido registrado (protocolo {pedido.id}), mas não conseguimos enviar o e-mail de confirmação.")
