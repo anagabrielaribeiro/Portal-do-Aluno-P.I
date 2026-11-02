@@ -3,6 +3,9 @@
 # necessidade = por que o dado precisa existir
 # retencao = por quanto tempo fica guardado e o que acontece depois
 
+FINALIDADE_TELEFONE = 'contato por telefone'
+FINALIDADE_COMUNICADOS = 'envio de avisos e comunicados'
+
 DADOS_PESSOAIS = [
     {'campo': 'nome', 'app': 'alunos', 'finalidade': 'identificação escolar',
      'base_legal': 'execução de contrato',
