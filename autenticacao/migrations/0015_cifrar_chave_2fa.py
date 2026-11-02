@@ -49,6 +49,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(cifrar_chaves_existentes, decifrar_chaves),
         migrations.AlterField(
             model_name='usuario',
             name='chave_2fa',
