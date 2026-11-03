@@ -129,7 +129,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'), 
         conn_max_age=60,
-        ssl_require=True,
+        ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', 'True') == 'True',
         engine='django.db.backends.postgresql',
     )
 }
@@ -186,6 +186,10 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# o WhiteNoise por padrão libera os arquivos estáticos para qualquer site usar
+# desligamos isso, pois os arquivos estáticos só são usados pelo próprio portal
+WHITENOISE_ALLOW_ALL_ORIGINS = False
 
 
 # Email

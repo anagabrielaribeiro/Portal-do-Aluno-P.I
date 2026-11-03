@@ -1,0 +1,7 @@
+10036	IGNORE	(Server header: vem do runserver usado so na esteira; na Vercel o cabecalho nao e exposto)
+10038	IGNORE	(CSP: melhoria planejada, exige revisar scripts e estilos inline dos templates antes de ativar)
+10049	IGNORE	(Non-Storable Content: paginas de login nao devem ser guardadas em cache, comportamento desejado)
+10063	IGNORE	(Permissions-Policy: protecao complementar, sem recurso nativo no Django, risco baixo)
+10111	IGNORE	(Authentication Request: apenas informativo, o ZAP identificou a tela de login)
+10112	IGNORE	(Session Management: apenas informativo, o site usa cookie de sessao por design)
+90004	IGNORE	(COEP: isolamento contra Spectre, nao se aplica ao projeto e pode quebrar recursos externos)
