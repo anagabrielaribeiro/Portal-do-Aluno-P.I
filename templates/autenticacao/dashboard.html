@@ -3,22 +3,189 @@
 
 {% block title %}Dashboard - Portal do Aluno{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
 {% block content %}
 
+    {# topo: só RA e ano, sem o nome do curso #}
     <header class="conteudo-topo">
         <div>
             <h2>Início</h2>
-            <p>Curso · RA · 2026</p>
+            <p>RA {{ aluno.ra }} · {% now "Y" %}</p>
         </div>
 
         <div class="conteudo-topo-acoes">
-            <span class="avatar">A</span>
+            <span class="avatar" title="{{ nome_exibicao }}">{{ iniciais }}</span>
         </div>
     </header>
 
-    <section class="conteudo-corpo">
-        <span class="eyebrow">Bem-vinda, Aluno</span>
-        <h1>Painel do estudante</h1>
+    {# boas-vindas com o nome do aluno #}
+    <section class="conteudo-corpo dash-boas-vindas">
+        <div>
+            <span class="eyebrow">Bem-vindo, {{ primeiro_nome }}</span>
+            <h1>Painel do estudante</h1>
+            {% if matricula %}
+                <div class="dash-subtitulo">
+                    {{ matricula.curso.nome }} · Turma {{ matricula.turma.codigo }} · Matrícula ativa no período {{ matricula.periodo_letivo }}
+                </div>
+            {% else %}
+                <div class="dash-subtitulo">Você não possui matrícula ativa no momento.</div>
+            {% endif %}
+        </div>
+        {% if matricula %}
+            <span class="dash-selo">Ativa</span>
+        {% endif %}
+    </section>
+
+    {# cartões de resumo: Atalhos ocupa o lugar da antiga "Média geral" #}
+    <section class="dash-resumo">
+
+        <article class="dash-card dash-atalhos">
+            <div class="dash-card-cab">
+                <span class="dash-card-titulo">Atalhos</span>
+                <span class="dash-icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2 4 14h7l-1 8 9-12h-7z"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="dash-atalhos-grade">
+                <a href="{% url 'notas_faltas' %}">Boletim</a>
+                <a href="{% url 'meus_documentos' %}">Declaração</a>
+                <a href="{% url 'meu_calendario' %}">Horários</a>
+                <a href="{% url 'lista_tarefas' %}">Tarefas</a>
+            </div>
+        </article>
+
+        <article class="dash-card">
+            <div class="dash-card-cab">
+                <span class="dash-card-titulo">Frequência</span>
+                <span class="dash-icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 5 5 19"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="dash-valor">
+                {% if frequencia_pct is not None %}{{ frequencia_pct|floatformat:1 }}%{% else %}—{% endif %}
+            </div>
+            <div class="dash-legenda">
+                {% if frequencia_pct is not None %}
+                    {{ total_faltas }} falta{{ total_faltas|pluralize }} registrada{{ total_faltas|pluralize }}
+                {% else %}
+                    Sem registros de frequência
+                {% endif %}
+            </div>
+        </article>
+
+        <article class="dash-card">
+            <div class="dash-card-cab">
+                <span class="dash-card-titulo">Pendências financeiras</span>
+                <span class="dash-icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 15h4"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="dash-valor">{{ qtd_pendentes }}</div>
+            <div class="dash-legenda">
+                {% if qtd_pendentes %}R$ {{ total_pendente|floatformat:"2g" }}{% else %}Tudo em dia{% endif %}
+            </div>
+        </article>
+
+        <article class="dash-card">
+            <div class="dash-card-cab">
+                <span class="dash-card-titulo">Tarefas pendentes</span>
+                <span class="dash-icone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8 11h8M8 15h5"/>
+                    </svg>
+                </span>
+            </div>
+            <div class="dash-valor">{{ qtd_tarefas }}</div>
+            <div class="dash-legenda">
+                {% if tarefa_recente %}Mais recente: {{ tarefa_recente.titulo|truncatechars:26 }}{% else %}Nenhuma tarefa pendente{% endif %}
+            </div>
+        </article>
+
+    </section>
+
+    {# alerta de mensalidade vencida, só aparece se houver boleto vencido #}
+    {% if vencidos %}
+        <div class="dash-alerta" role="alert">
+            <span class="dash-alerta-icone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.01"/>
+                </svg>
+            </span>
+            <div class="dash-alerta-texto">
+                {% if vencidos|length == 1 %}
+                    <strong>Mensalidade vencida</strong>
+                    <span>A parcela de {{ vencidos.0.mes_referencia }} está vencida. Acesse o financeiro para emitir o boleto atualizado.</span>
+                {% else %}
+                    <strong>Mensalidades vencidas</strong>
+                    <span>Você tem {{ vencidos|length }} parcelas vencidas. Acesse o financeiro para emitir os boletos atualizados.</span>
+                {% endif %}
+            </div>
+            <a class="dash-alerta-link" href="{% url 'financeiro' %}">
+                Financeiro
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17 17 7M8 7h9v9"/>
+                </svg>
+            </a>
+        </div>
+    {% endif %}
+
+    <section class="dash-grade">
+
+        <article class="dash-card dash-desempenho">
+            <div class="dash-card-cab dash-card-cab--secao">
+                <h3>Desempenho por componente</h3>
+                <a href="{% url 'notas_faltas' %}">Ver notas e faltas</a>
+            </div>
+
+            {% for c in componentes %}
+                <div class="dash-comp">
+                    <div class="dash-comp-linha">
+                        <span class="dash-comp-nome">{{ c.disciplina }}</span>
+                        <strong class="dash-comp-nota">
+                            {% if c.media is not None %}{{ c.media|floatformat:2 }}{% else %}—{% endif %}
+                        </strong>
+                    </div>
+                    <progress class="dash-barra" max="100" value="{{ c.barra }}" aria-label="Média em {{ c.disciplina }}">{{ c.barra }}%</progress>
+                    <div class="dash-comp-meta">
+                        Prof. {{ c.professor }} · {{ c.faltas }} falta{{ c.faltas|pluralize }}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="dash-vazio">Ainda não há notas ou faltas lançadas neste período.</div>
+            {% endfor %}
+        </article>
+
+        <article class="dash-card dash-eventos">
+            <div class="dash-card-cab dash-card-cab--secao">
+                <h3>Próximos eventos</h3>
+            </div>
+            <ul>
+                {% for b in eventos %}
+                    <li>
+                        <span class="dash-data">
+                            <b>{{ b.vencimento|date:"d" }}</b>
+                            <small>{{ b.vencimento|date:"M"|upper }}</small>
+                        </span>
+                        <div>
+                            <span class="dash-evento-titulo">Vencimento da mensalidade</span>
+                            <span class="dash-evento-tipo">{{ b.mes_referencia }}</span>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="dash-vazio">Nenhum evento próximo.</li>
+                {% endfor %}
+            </ul>
+        </article>
+
     </section>
 
 {% endblock %}

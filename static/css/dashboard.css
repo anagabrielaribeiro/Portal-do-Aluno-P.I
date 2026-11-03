@@ -1,0 +1,244 @@
+/* Dashboard do aluno*/
+
+/* boas-vindas */
+.dash-boas-vindas {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dash-subtitulo {
+    margin-top: 8px;
+    color: var(--text-muted);
+}
+
+.dash-selo {
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(34, 197, 94, 0.15);
+    color: #16A34A;
+}
+
+/* cartões */
+.dash-card {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px 22px;
+}
+
+.dash-card-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dash-card-titulo {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
+.dash-icone {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.12);
+    color: #7C3AED;
+}
+
+.dash-icone svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* linha de resumo 4 colunas */
+.dash-resumo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.dash-valor {
+    margin-top: 18px;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.dash-legenda {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* atalhos */
+.dash-atalhos-grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.dash-atalhos-grade a {
+    padding: 9px 10px;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--text-main);
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.dash-atalhos-grade a:hover {
+    background: var(--hover-bg);
+    color: #7C3AED;
+}
+
+/* alerta de mensalidade vencida */
+.dash-alerta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: #DC2626;
+}
+
+.dash-alerta-icone svg {
+    width: 24px;
+    height: 24px;
+}
+
+.dash-alerta-texto {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dash-alerta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: #7C3AED;
+    text-decoration: none;
+}
+
+.dash-alerta-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* desempenho + eventos */
+.dash-grade {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.dash-card-cab--secao {
+    margin-bottom: 20px;
+}
+
+.dash-card-cab--secao h3 {
+    margin: 0;
+}
+
+.dash-card-cab--secao a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #7C3AED;
+    text-decoration: none;
+}
+
+.dash-comp + .dash-comp {
+    margin-top: 20px;
+}
+
+.dash-comp-linha {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-main);
+}
+
+.dash-barra {
+    width: 100%;
+    height: 8px;
+    margin-top: 8px;
+    accent-color: #7C3AED; 
+}
+
+.dash-comp-meta {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.dash-eventos ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dash-eventos li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.dash-data {
+    width: 44px;
+    height: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(124, 58, 237, 0.12);
+    color: #7C3AED;
+}
+
+.dash-data small {
+    font-size: 0.65rem;
+}
+
+.dash-evento-titulo {
+    display: block;
+    color: var(--text-main);
+}
+
+.dash-evento-tipo {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.dash-vazio {
+    color: var(--text-muted);
+}
+
+
+@media (max-width: 900px) {
+    .dash-grade {
+        grid-template-columns: 1fr;
+    }
+}

@@ -13,6 +13,16 @@ from .models import Consentimento, SolicitacaoExclusao
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.db import SessionStore
 from .context_processors import termos_pendentes
+import os
+import shutil
+import tempfile
+from django.contrib import messages
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from documentos_certificados.models import Certificado, SolicitacaoDocumento
+from tarefas.models import Tarefa
+from .models import tem_consentimento
+
 
 SENHA = 'SenhaTeste@2026'
 
@@ -322,3 +332,87 @@ class ContextProcessorTest(BaseLGPD):
         request.session['termos_aceitos'] = True
         with self.assertNumQueries(0):  # é o ganho do commit 8
             termos_pendentes(request)
+
+# cada dado explica por que existe e por quanto tempo fica
+class MinimizacaoTest(TestCase):
+
+    def test_todo_dado_tem_necessidade_e_retencao(self):
+        for dado in DADOS_PESSOAIS:
+            self.assertTrue(dado.get('necessidade'), f"'{dado['campo']}' está sem necessidade")
+            self.assertTrue(dado.get('retencao'), f"'{dado['campo']}' está sem retenção")
+
+
+# depois de revogar, o sistema deixa de ter consentimento para aquela finalidade
+class RevogacaoInterrompeTratamentoTest(BaseLGPD):
+
+    def test_depois_de_revogar_pela_tela_nao_ha_mais_consentimento(self):
+        consentimento = Consentimento.objects.create(aluno=self.aluno, finalidade='contato por telefone')
+        self.assertTrue(tem_consentimento(self.aluno, 'contato por telefone'))
+
+        self.client.post(reverse('revogar_consentimento', args=[consentimento.id]))
+
+        self.assertFalse(tem_consentimento(self.aluno, 'contato por telefone'))
+
+    def test_quem_recusou_ou_nunca_decidiu_nao_tem_consentimento(self):
+        Consentimento.objects.create(aluno=self.aluno, finalidade='contato por telefone', aceito=False)
+        self.assertFalse(tem_consentimento(self.aluno, 'contato por telefone'))
+        self.assertFalse(tem_consentimento(self.aluno2, 'contato por telefone'))
+
+
+# a anonimização apaga também as cópias que identificam o aluno
+class AnonimizacaoApagaCopiasTest(BaseLGPD):
+
+    def setUp(self):
+        super().setUp()
+        # os arquivos de teste vão para uma pasta temporária, apagada no final
+        pasta = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, pasta, ignore_errors=True)
+        self.enterContext(override_settings(MEDIA_ROOT=pasta))
+
+        self.usuario.first_name = 'Maria'
+        self.usuario.last_name = 'Souza'
+        self.usuario.ultimo_ip_acesso = '203.0.113.7'
+        self.usuario.save()
+
+        Tarefa.objects.create(aluno=self.aluno, titulo='Consulta médica')
+        self.certificado = Certificado.objects.create(
+            aluno=self.aluno, titulo='Curso', data=date(2026, 1, 1),
+            arquivo=SimpleUploadedFile('c.pdf', b'%PDF-1.4 certificado'))
+        self.documento = SolicitacaoDocumento.objects.create(
+            aluno=self.aluno, tipo='atestado',
+            arquivo_gerado=SimpleUploadedFile('a.pdf', b'%PDF-1.4 atestado com nome e cpf'))
+        self.caminhos = [self.certificado.arquivo.path, self.documento.arquivo_gerado.path]
+        self.pedido = SolicitacaoExclusao.objects.create(aluno=self.aluno)
+
+        # execute=True roda o que só acontece depois do commit (apagar os arquivos)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.aluno.anonimizar()
+        self.usuario.refresh_from_db()
+
+    def test_conta_fica_sem_dado_pessoal(self):
+        self.assertEqual(self.usuario.first_name, '')
+        self.assertEqual(self.usuario.last_name, '')
+        self.assertIsNone(self.usuario.ultimo_ip_acesso)
+        self.assertFalse(self.usuario.has_usable_password())  # a senha antiga não serve mais
+
+    def test_arquivos_e_registros_pessoais_somem(self):
+        for caminho in self.caminhos:
+            self.assertFalse(os.path.exists(caminho))  # o arquivo sai do armazenamento
+        self.assertEqual(self.aluno.tarefas.count(), 0)
+        self.assertEqual(self.aluno.certificados.count(), 0)
+        self.documento.refresh_from_db()
+        self.assertFalse(self.documento.arquivo_gerado)  # o pedido continua, sem o arquivo
+
+    def test_pedido_de_exclusao_fica_concluido(self):
+        self.pedido.refresh_from_db()
+        self.assertEqual(self.pedido.status, 'concluida')
+
+
+#
+class MensagemDoPedidoDeExclusaoTest(BaseLGPD):
+
+    def test_mostra_sucesso_quando_o_email_de_confirmacao_sai(self):
+        resposta = self.client.post(reverse('solicitar_exclusao'))
+        niveis = [m.level for m in get_messages(resposta.wsgi_request)]
+        self.assertIn(messages.SUCCESS, niveis)
+        self.assertNotIn(messages.WARNING, niveis)

@@ -10,7 +10,8 @@ from django.utils import timezone
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
-
+import re
+from urllib.parse import urlparse
 from autenticacao.models import Usuario
 
 @override_settings(SECURE_SSL_REDIRECT=False) # o teste usa http
@@ -137,3 +138,46 @@ class RecuperacaoSenhaTests(TestCase):
         self.usuario.refresh_from_db()
         self.assertEqual(self.usuario.tentativas_login_falha, 0)
         self.assertIsNone(self.usuario.bloqueio_ate)
+
+    # requisito 2.7 (registro de sucesso e falha do envio)
+    def test_log_de_sucesso_quando_o_email_e_entregue_ao_smtp(self):
+        with self.assertLogs('recuperacao_senha', level='INFO') as registro:
+            self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        saida = '\n'.join(registro.output)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('SUCESSO: e-mail de recuperação entregue ao servidor SMTP', saida)
+        self.assertNotIn('teste@exemplo.com', saida)  # continua mascarado
+
+    def test_nao_registra_sucesso_de_envio_quando_o_email_nao_existe(self):
+        with self.assertLogs('recuperacao_senha', level='INFO') as registro:
+            self.client.post(reverse('password_reset'), {'email': 'naoexiste@exemplo.com'})
+        saida = '\n'.join(registro.output)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotIn('SUCESSO', saida)  # nada foi enviado, então não pode constar como enviado
+
+    def test_log_de_falha_quando_o_smtp_cai(self):
+        with patch('django.core.mail.EmailMultiAlternatives.send',
+                   side_effect=smtplib.SMTPException('falha')):
+            with self.assertLogs('recuperacao_senha', level='INFO') as registro:
+                resp = self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        saida = '\n'.join(registro.output)
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn('FALHA: não foi possível enviar o e-mail de recuperação (SMTPException', saida)
+        self.assertNotIn('SUCESSO', saida)
+        self.assertNotIn('teste@exemplo.com', saida)
+
+    def test_link_do_email_enviado_redefine_a_senha_e_registra_sucesso(self):
+        # prova funcional: o link que está dentro do e-mail entregue é o que de fato troca a senha
+        self.client.post(reverse('password_reset'), {'email': 'teste@exemplo.com'})
+        link = re.search(r'https?://\S+/reset/\S+/\S+/', mail.outbox[0].body).group(0)
+        resp = self.client.get(urlparse(link).path, follow=True)
+        self.assertEqual(resp.status_code, 200)
+
+        with self.assertLogs('recuperacao_senha', level='INFO') as registro:
+            self.client.post(resp.request['PATH_INFO'], {
+                'new_password1': 'SenhaNova456!',
+                'new_password2': 'SenhaNova456!',
+            })
+        self.usuario.refresh_from_db()
+        self.assertTrue(self.usuario.check_password('SenhaNova456!'))
+        self.assertIn('SUCESSO: senha redefinida pelo link do e-mail', '\n'.join(registro.output))

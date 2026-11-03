@@ -13,6 +13,16 @@ class LogAutenticacaoAdmin(admin.ModelAdmin):
     list_display = ('data_hora', 'usuario', 'evento', 'ip')  # colunas mostradas na listagem do admin
     readonly_fields = [f.name for f in LogAutenticacao._meta.fields]  # todos os campos ficam somente leitura
 
+    # nem o superusuário cria, edita ou apaga log pelo admin
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 @admin.register(Colaborador)
 class ColaboradorAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'cargo')  # colunas mostradas na listagem do admin
@@ -23,3 +33,13 @@ class LogAuditoriaAdmin(admin.ModelAdmin):
     list_display = ('data_hora', 'usuario', 'acao', 'risco', 'ip_origem')  # colunas mostradas na listagem
     list_filter = ('acao', 'risco')  # permite filtrar por tipo de ação e nível de risco, útil pra auditoria
     readonly_fields = [f.name for f in LogAuditoria._meta.fields]  # somente leitura, é um log, não deve ser editado
+
+    # nem o superusuário cria, edita ou apaga log pelo admin
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

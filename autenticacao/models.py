@@ -48,12 +48,12 @@ class Usuario(AbstractUser):
 
     # chave secreta usada pela biblioteca pyotp gerar e conferir os 2f
     # ela é criada uma vez só, no login, e fica guardada para usar no proximo
-    chave_2fa = models.CharField(
+    chave_2fa = CampoCriptografado(
     max_length=255,
     null=True,
     blank=True,
     help_text='chave secreta usada para gerar os códigos do autenticador'
-    )
+)
 
     # esse método responde se o usuario está bloqueado agora
     # se não tiver nenhuma data de bloqueio salva, retorna False 
@@ -70,11 +70,19 @@ class Usuario(AbstractUser):
         db_table = 'auth_user'
 
 
+class QuerySetLogImutavel(models.QuerySet):
+
+    def update(self, **kwargs):
+        raise ValueError('Logs não podem ser alterados')
+
+    def bulk_update(self, objs, fields, batch_size=None):
+        raise ValueError('Logs não podem ser alterados')
+
+    def delete(self):
+        raise ValueError('Logs não podem ser excluídos')
+
+
 class LogAuditoria(models.Model):
-    """
-    Tabela para registrar os logs de segurança e auditoria (Atividade 5.2).
-    Guarda quem tentou acessar, o que deu errado, o nível de risco e o IP.
-    """
 
     class Acao(models.TextChoices):
         LOGIN_FALHO = 'login_falho', 'Falha na Senha'
@@ -102,6 +110,7 @@ class LogAuditoria(models.Model):
     ip_origem = models.GenericIPAddressField(null=True, blank=True, help_text="IP de onde veio a tentativa")
     detalhes = models.TextField(blank=True, null=True, help_text="Detalhes extras do evento")
     data_hora = models.DateTimeField(auto_now_add=True) # Preenche sozinho com a hora do servidor
+    objects = QuerySetLogImutavel.as_manager()
 
 
     def save(self, *args, **kwargs):
@@ -136,6 +145,8 @@ class LogAutenticacao(models.Model):
     evento = models.CharField(max_length=30, default='login_sucesso') # tipodo evento registrado
     ip = models.GenericIPAddressField(null=True, blank=True) # ip de quem fez login
     data_hora = models.DateTimeField(default=timezone.now)
+
+    objects = QuerySetLogImutavel.as_manager()  # update() e delete() em queryset passam a ser recusados
 
     class Meta:
         ordering = ['id'] # ordena os logs pela ordem em que foram criados

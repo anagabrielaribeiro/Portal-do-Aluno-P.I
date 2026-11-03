@@ -17,6 +17,7 @@ from django.db.models import F
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
 import logging
+from django.conf import settings  
 
 # Configuração do logger para capturar falhas de cache sem derrubar o sistema
 logger = logging.getLogger(__name__)
@@ -38,18 +39,23 @@ def home_view(request):
     return render(request, 'autenticacao/home.html')  # o caminho do seu template
 
 
-# usa o ultimo valor que a hospedagem adiciona 
+# o X-Forwarded-For só vale quando existe um proxy nosso na frente
+# cada proxy confiavel anex no fim da lista o IP de quem falou com ele, então
+# contamos da direita para a esquerd o que vem antes disso o cliente pode forja
 def obter_ip(request):
+    ip = request.META.get('REMOTE_ADDR')
 
-    xff = request.META.get('HTTP_X_FORWARDED_FOR')
-    ip = xff.split(',')[-1].strip() if xff else request.META.get('REMOTE_ADDR')
+    if settings.BEHIND_PROXY:
+        xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+        cadeia = [parte.strip() for parte in xff.split(',') if parte.strip()]
+        n = settings.PROXIES_CONFIAVEIS
+        if n >= 1 and len(cadeia) >= n:
+            ip = cadeia[-n]
     # se não for um ip valido devolve none, sem erro 500 no log
-    try: 
+    try:
         return str(ipaddress.ip_address(ip))
     except ValueError:
         return None
-
-
 
 
 # Funções Auxiliares 
@@ -437,10 +443,100 @@ def dashboard(request):
     if not hasattr(request.user, 'aluno'):
         return redirect('/gestao-portal/')
 
-    return render(
-        request,
-        'autenticacao/dashboard.html'
+    # imports aqui para evitar import entre os apps
+    from django.utils import timezone
+    from matriculas.models import Matricula
+    from notas.models import Nota
+    from calendario_horarios.models import Frequencia, Turma
+    from django.db.models import Avg
+    from financeiro.models import Boleto
+    from tarefas.models import Tarefa
+
+    aluno = request.user.aluno
+    hoje = timezone.localdate()
+
+    # nome de boas-vindas e iniciais no circulo (usa o nome social se tiver)
+    nome_exibicao = (aluno.nome_social or aluno.nome or '').strip()
+    partes = nome_exibicao.split()
+    primeiro_nome = partes[0] if partes else 'aluno'
+    if len(partes) > 1:
+        iniciais = (partes[0][0] + partes[-1][0]).upper()
+    else: 
+        iniciais = primeiro_nome[0].upper()
+
+    
+    # matricula ativa 
+    matricula = (
+        Matricula.objects
+        .filter(aluno=aluno, status='ativa')
+        .select_related('curso', 'turma')
+        .first()
     )
+
+    componetes = []
+    frequencia_porcentagem = None
+    total_faltas = 0 
+
+    if matricula:
+        #média das notas de cada turma
+        medias = {
+            n['turma']:n['media']
+            for n in Nota.objects.filter(matricula=matricula)
+            .values('turma').annotate(media=Avg('nota'))
+        }
+
+        # registro de frequencia mais recente de cada turma 
+        ultima_frequencia = {}
+        for f in Frequencia.objects.filter(matricula=matricula).order_by('turma_id', '-data'):
+            ultima_frequencia.setdefault(f.turma_id, f)
+
+        
+        turma_ids = set(medias) | set(ultima_frequencia) | {matricula.turma_id}
+        turmas = (
+            Turma.objects.filter(pk__in=turma_ids)
+            .select_related('Disciplina', 'Professor')
+            .order_by('Disciplina__nome')
+        )
+
+        for t in turmas:
+            media = medias.get(t.pk)
+            freq = ultima_frequencia.get(t.pk)
+            componetes.append({
+                'disciplina': t.Disciplina.nome,
+                'professor': t.Professor.nome,
+                'media': media, 
+                'faltas': freq.faltas if freq else 0,
+                'barra': max(0, min(100, int(round(float(media) * 10))) if media is not None else 0)
+            })
+
+        if ultima_frequencia:
+            total_faltas = sum(f.faltas for f in ultima_frequencia.values())
+            frequencia_porcentagem = sum(f.percentual for f in ultima_frequencia.values()) / len(ultima_frequencia)
+
+    # tudo que não foi pago, app financeiro 
+    pendentes = list(Boleto.objects.filter(aluno=aluno, pago=False).order_by('vencimento'))
+    vencidos = [b for b in pendentes if b.vencimento < hoje]
+    eventos = [b for b in pendentes if b.vencimento >= hoje][:4]
+    total_pendente = sum(b.valor for b in pendentes)
+
+    # tarefas pendentes 
+    tarefas_pendentes = Tarefa.objects.filter(aluno=aluno, concluida=False).order_by('-data_criacao')
+    return render(request, 'autenticacao/dashboard.html', {
+        'aluno': aluno,
+        'nome_exibicao': nome_exibicao,
+        'primeiro_nome': primeiro_nome,
+        'iniciais': iniciais,
+        'matricula': matricula,
+        'componentes': componetes,
+        'frequencia_porcentagem': frequencia_porcentagem,
+        'total_faltas': total_faltas,
+        'qtd_pendentes': len(pendentes),
+        'total_pendente': total_pendente,
+        'vencidos': vencidos,
+        'eventos': eventos,
+        'qtd_tarefas': tarefas_pendentes.count(),
+        'tarefa_recente': tarefas_pendentes.first(),
+    })
 
 
 # LOGOUT

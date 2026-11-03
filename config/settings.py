@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+# cria a branch Ajustes-Gerais
+
 from pathlib import Path
 import dj_database_url
 import os
@@ -125,7 +127,7 @@ if not os.environ.get('DATABASE_URL'):
 # Banco de Dados online
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
+        default=os.environ.get('DATABASE_URL'), 
         conn_max_age=60,
         ssl_require=True,
         engine='django.db.backends.postgresql',
@@ -199,7 +201,7 @@ STORAGES = {
 
 # Deixamos o PBKDF2 explícito aqui por ser a recomendação da OWASP contra ataques de força bruta.
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",     # É o principal, que o Django vai usar pra encriptar (fazer o hash) das senhas novas.
+    "config.hashers.PBKDF2CustoDefinido",    # PBKDF2 com número de iterações definido por nós (config/hashers.py)
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",     # Os próximos ficam apenas de "reserva" caso o sistema precise ler alguma senha antiga que tenha sido salva com outro padrão antes.
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
@@ -225,6 +227,11 @@ DEFAULT_FROM_EMAIL =  f'Portal do Aluno PI <{EMAIL_HOST_USER}>'
 
 # le a chave de criptografia do .env pra ficar disponível em qualquer parte do projeto
 CHAVE_CRIPTOGRAFIA = os.getenv('CHAVE_CRIPTOGRAFIA')
+# chaves antigas, só servem para ler dados que ainda estão cifrados com elas durante uma rotação
+CHAVES_CRIPTOGRAFIA_ANTIGAS = [
+    chave.strip() for chave in os.getenv('CHAVES_CRIPTOGRAFIA_ANTIGAS', '').split(',') if chave.strip()
+]
+
 CHAVE_HASH_CPF = os.environ.get('CHAVE_HASH_CPF') 
 
 # Configuração de Logs de Auditoria (Seguro para Servidores em Nuvem / Vercel)
@@ -267,17 +274,23 @@ MEDIA_ROOT = BASE_DIR / 'media' # pasta real no disco onde esses arquivos ficam 
 
 
 # HTTPS ATIVO INDEPENDENTE DE DEBUG OU VERCEL
+FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True').strip().lower() not in ('false', '0', 'no') # "false" explícito desliga o HTTPS
+#  na vercel o HTTPS não pode ficar desligado
+if os.environ.get('VERCEL') and not FORCE_HTTPS: 
+    raise ImproperlyConfigured('FORCE_HTTPS não pode ser desligado na Vercel')
 
-FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'True') == 'True'
+
 
 SECURE_SSL_REDIRECT = FORCE_HTTPS            # redireciona http:// para https://
-SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPS
+SESSION_COOKIE_SECURE = FORCE_HTTPS          # cookie de sessão só trafega em HTTPs
 CSRF_COOKIE_SECURE = FORCE_HTTPS             # cookie CSRF só trafega em HTTPS
 
 # Só confie no cabeçalho do proxy se REALMENTE houver um proxy na frente (Vercel).
 BEHIND_PROXY = os.environ.get('BEHIND_PROXY', 'True') == 'True'
 if BEHIND_PROXY:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+PROXIES_CONFIAVEIS = int(os.environ.get('PROXIES_CONFIAVEIS', 1))
 
 if FORCE_HTTPS:
     SECURE_HSTS_SECONDS = int(os.environ.get('HSTS_SECONDS', 3600))
