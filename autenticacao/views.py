@@ -19,6 +19,8 @@ from django.views.decorators.cache import never_cache
 import logging
 from django.conf import settings  
 
+# teste
+
 # Configuração do logger para capturar falhas de cache sem derrubar o sistema
 logger = logging.getLogger(__name__)
 
