@@ -129,7 +129,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'), 
         conn_max_age=60,
-        ssl_require=True,
+        ssl_require=os.environ.get('DATABASE_SSL_REQUIRE', 'True') == 'True',
         engine='django.db.backends.postgresql',
     )
 }
