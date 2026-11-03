@@ -187,6 +187,10 @@ STORAGES = {
     },
 }
 
+# o WhiteNoise por padrão libera os arquivos estáticos para qualquer site usar
+# desligamos isso, pois os arquivos estáticos só são usados pelo próprio portal
+WHITENOISE_ALLOW_ALL_ORIGINS = False
+
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
