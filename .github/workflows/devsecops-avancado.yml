@@ -114,7 +114,8 @@ jobs:
           path: .                              # "." a pasta inteira do projeto
           format: html                         # relatório em HTML, fácil de abrir
           output: bearer-relatorio.html        # nome do arquivo gerado
-          exit-code: 0                         # por enquanto NÃO bloqueia
+          severity: critical        # só considera achados críticos
+          exit-code: 1                       # falha o job se houver achado crítico
 
       # salva o relatório para baixar depois
       - name: Salvar relatório do Bearer
