@@ -128,4 +128,23 @@ jobs:
     name: SBOM com Trivy
     runs-on: ubuntu-latest
     steps:
-      - run: echo "em construção"
+      # baixa o código
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      # o Trivy le o projeto e gera o SBOM no formato CycloneDX
+      - name: Gerar SBOM com Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs                # analisa os arquivos do projeto
+          scan-ref: .                  # a pasta inteira
+          format: cyclonedx            # formato padrão de SBOM
+          output: sbom.json            # nome do arquivo gerado
+
+      # salva o sbom.json para baixar
+      - name: Salvar SBOM como artefato
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
