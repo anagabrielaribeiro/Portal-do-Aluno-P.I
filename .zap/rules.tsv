@@ -1,4 +1,4 @@
-10036   IGNORE  (Server header: vem do runserver usado so na esteira; na Vercel o cabecalho nao e exposto)
+10036	IGNORE	(Server header: vem do runserver usado so na esteira; na Vercel o cabecalho nao e exposto)
 10038	IGNORE	(CSP: melhoria planejada, exige revisar scripts e estilos inline dos templates antes de ativar)
 10049	IGNORE	(Non-Storable Content: paginas de login nao devem ser guardadas em cache, comportamento desejado)
 10063	IGNORE	(Permissions-Policy: protecao complementar, sem recurso nativo no Django, risco baixo)
