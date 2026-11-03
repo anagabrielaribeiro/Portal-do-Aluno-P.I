@@ -1,0 +1,103 @@
+# nome que aparece na aba Actions do GitHub
+name: DevSecOps Avançado
+
+# quando a esteira roda em push nas branches abaixo e em Pull Requests para a main
+on:
+  push:
+    branches: ["**"]          # roda em push em qualquer branch
+  pull_request:
+    branches: ["main"]        # e também em Pull Requests para a main
+
+
+# a esteira só precisa ler o código
+permissions:
+  contents: read
+
+jobs:
+  # DAST com OWASP ZAP
+  dast-zap:
+    name: DAST com OWASP ZAP
+    runs-on: ubuntu-latest
+
+    # banco Postgres temporário existe só durante esta execução e some depois
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: teste
+          POSTGRES_PASSWORD: senha_de_teste
+          POSTGRES_DB: portal_teste
+        ports:
+          - 5432:5432
+        # espera o banco ficar pronto antes de seguir
+        options: >-
+          --health-cmd "pg_isready -U teste"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # variaveis de teste 
+    env:
+      DJANGO_SECRET_KEY: chave-falsa-para-esteira-ci-nao-usar-em-producao-1234567890
+      DJANGO_DEBUG: "False"
+      DATABASE_URL: postgres://teste:senha_de_teste@localhost:5432/portal_teste
+      DATABASE_SSL_REQUIRE: "False"   # o Postgres da esteira não tem SSL
+      FORCE_HTTPS: "False"            # senão o app redireciona para https e o ZAP não acessa
+      BEHIND_PROXY: "False"           # na esteira não há proxy da Vercel
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+
+    steps:
+      #baixa o código do repositório para o runner
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      # instala o Python 
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # innstala as bibliotecas do requirements
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      # cria chaves falsas de criptografia, só para o app conseguir iniciar
+      - name: Gerar chaves falsas
+        run: |
+          echo "CHAVE_CRIPTOGRAFIA=$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" >> $GITHUB_ENV
+          echo "CHAVE_HASH_CPF=chave-falsa-hash-cpf-esteira" >> $GITHUB_ENV
+
+      # prepara o banco de teste e os arquivos estaticos
+      - name: Preparar o banco e os estáticos
+        run: |
+          python manage.py migrate --noinput
+          python manage.py createcachetable
+          python manage.py collectstatic --noinput
+
+      # liga o servidor em segundo plano 
+      - name: Subir a aplicação
+        run: nohup python manage.py runserver 0.0.0.0:8000 > servidor.log 2>&1 &
+
+      # espera o site responder
+      - name: Esperar a aplicação responder
+        run: |
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:8000/ && echo "App no ar" && exit 0
+            sleep 2
+          done
+          echo "App não subiu"; cat servidor.log; exit 1
+
+  # bearer 
+  privacidade-bearer:
+    name: Privacidade com Bearer
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "em construção"
+
+  # SBOM com Trivy 
+  sbom-trivy:
+    name: SBOM com Trivy
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "em construção"
