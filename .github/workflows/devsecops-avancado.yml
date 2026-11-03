@@ -93,7 +93,7 @@ jobs:
         uses: zaproxy/action-baseline@v0.14.0
         with:
           target: "http://localhost:8000"   # endereço da aplicação no runner
-          fail_action: false                # por enquanto NÃO bloqueia 
+          fail_action: true                 # bloqueia o job fica vermelho se o ZAP achar alertas 
           allow_issue_writing: false        # não cria issues automaticamente no repositório
           artifact_name: relatorio-zap      # nome do relatório na aba Actions
 
