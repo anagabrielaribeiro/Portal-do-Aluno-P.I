@@ -94,6 +94,7 @@ jobs:
         with:
           target: "http://localhost:8000"   # endereço da aplicação no runner
           fail_action: true                 # bloqueia o job fica vermelho se o ZAP achar alertas 
+          rules_file_name: ".zap/rules.tsv"   # alertas ignorados com justificativa
           allow_issue_writing: false        # não cria issues automaticamente no repositório
           artifact_name: relatorio-zap      # nome do relatório na aba Actions
 
