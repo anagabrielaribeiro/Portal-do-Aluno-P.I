@@ -1,5 +1,9 @@
 # Portal do Aluno P.I - Gestão Acadêmica e Autoatendimento do Estudante
 
+**Integrantes:**
+- Ana Gabriela Gonçalves Ribeiro - RGM: 11221103784 - Eng. Software 7°B
+- Vitória Rodrigues de Souza - RGM: 11232100574 - Eng. Software 7°B
+
 Sistema web para autoatendimento, acompanhamento acadêmico, financeiro, documental e serviços integrados ao estudante.
 
 ## Stack tecnológica
@@ -52,21 +56,30 @@ O sistema será dividido em aplicações independentes, chamadas de **apps**, se
 * **Documentos & Certificados:** Acesso e emissão da declaração de matrícula, visualização de documentos pessoais cadastrados (RG), download de arquivos institucionais e inclusão/consulta de certificados.
 * **Privacidade & LGPD:** Painel para consulta de dados pessoais cadastrados, gestão/revogação de consentimento e solicitação de exportação ou exclusão de dados pessoais.
 
-A estrutura de diretórios do projeto seguirá a organização abaixo:
+A estrutura de diretórios do projeto segue a organização abaixo:
 
 ```text
-portal_aluno/
+Portal-do-Aluno-P.I/
 |-- manage.py
 |-- requirements.txt
 |-- README.md
 |-- LICENSE
 |-- .gitignore
 |
+|-- .github/
+|   |-- workflows/
+|       |-- devsecops-avancado.yml   # esteira DevSecOps (ZAP, Bearer e Trivy)
+|
+|-- .zap/
+|   |-- rules.tsv                    # alertas do ZAP aceitos, com justificativa
+|
 |-- config/
 |   |-- settings.py
 |   |-- urls.py
 |   |-- asgi.py
 |   |-- wsgi.py
+|
+|-- docs/                            # documentação técnica do projeto
 |
 |-- alunos/
 |   |-- models.py
@@ -123,25 +136,22 @@ portal_aluno/
 |   |   |-- meus_consentimentos.html
 |   |-- recuperacao_senha/
 |       |-- password_reset_form.html
-|   |   |-- password_reset_email.html
-|   |   |-- password_reset_done.html
-|   |   |-- password_reset_confirm.html
-|   |   |-- password_reset_complete.html
+|       |-- password_reset_email.html
+|       |-- password_reset_done.html
+|       |-- password_reset_confirm.html
+|       |-- password_reset_complete.html
 |
 |-- static/
-    |-- css/ 
-    |   |-- style.css 
-    |   |-- aluno.css 
-    |   |-- matricula.css 
+    |-- css/
+    |   |-- style.css
+    |   |-- aluno.css
+    |   |-- matricula.css
     |   |-- privacidade.css
     |-- js/
     |   |-- main.js
     |-- images/
         |-- logo.jpeg
- ```
+```
 
 
 
-**Integrantes:**
-- Ana Gabriela Gonçalves Ribeiro - RGM: 11221103784 - Eng. Software 7°B
-- Vitória Rodrigues de Souza - RGM: 11232100574 - Eng. Software 7°B
