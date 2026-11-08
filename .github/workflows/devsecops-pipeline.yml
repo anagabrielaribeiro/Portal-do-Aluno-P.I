@@ -1,0 +1,35 @@
+name: DevSecOps Pipeline
+
+# a esteira roda em push em qualquer branch e em Pull Requests para a main
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["main"]
+
+
+permissions:
+  contents: read
+
+jobs:
+  # procura senhas e chaves no código e no histórico do Git
+  secrets-trufflehog:
+    name: Segredos com TruffleHog
+    runs-on: ubuntu-24.04
+    steps:
+     
+      
+      - name: Baixar o código
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # baixa o histórico de commits
+
+      # roda o TruffleHog e falha se encontrar algum segredo
+      - name: Varredura de segredos com TruffleHog
+        uses: trufflesecurity/trufflehog@v3.92.1
+        with:
+          extra_args: --results=verified,unknown   # verified = segredo confirmado como ativo
+
+
+
+ 
