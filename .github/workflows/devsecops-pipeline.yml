@@ -28,8 +28,7 @@ jobs:
       - name: Varredura de segredos com TruffleHog
         uses: trufflesecurity/trufflehog@v3.92.1
         with:
+          base: ''
+          head: HEAD 
+          version: 3.92.1
           extra_args: --results=verified,unknown   # verified = segredo confirmado como ativo
-
-
-
- 
