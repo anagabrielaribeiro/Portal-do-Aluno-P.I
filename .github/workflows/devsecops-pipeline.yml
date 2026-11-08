@@ -32,3 +32,24 @@ jobs:
           head: HEAD 
           version: 3.92.1
           extra_args: --results=verified,unknown   # verified = segredo confirmado como ativo
+
+  # procura vulnerabilidades nas bibliotecas do requirements.txt
+  sca-trivy:
+    name: Dependências com Trivy
+    runs-on: ubuntu-24.04
+    steps:
+      # baixa o código
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      # roda o Trivy nas dependências
+      - name: Analisar dependências com Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs            # analisa os arquivos do projeto
+          scan-ref: .              
+          scanners: vuln           # só vulnerabilidades em bibliotecas (CVEs)
+          severity: HIGH,CRITICAL  # só considera gravidade alta e crítica
+          ignore-unfixed: true     # ignora falhas que ainda não têm versão corrigida
+          format: table            
+          exit-code: "1"           # falha se encontrar algo
