@@ -53,3 +53,20 @@ jobs:
           ignore-unfixed: true     # ignora falhas que ainda não têm versão corrigida
           format: table            
           exit-code: "1"           # falha se encontrar algo
+
+  # lê o código do projeto procurando padrões inseguros (SAST)
+  sast-semgrep:
+    name: SAST com Semgrep
+    runs-on: ubuntu-24.04
+    steps:
+      
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      # instala o Semgrep
+      - name: Instalar o Semgrep
+        run: pipx install semgrep==1.168.0
+
+      # roda com as regras de Python e Django e falha se achar problema de gravidade ERROR 
+      - name: Análise estática com Semgrep
+        run: semgrep scan --config p/python --config p/django --severity ERROR --error --metrics=off
