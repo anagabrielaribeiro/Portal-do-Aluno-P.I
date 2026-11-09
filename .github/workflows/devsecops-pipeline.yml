@@ -1,0 +1,72 @@
+name: DevSecOps Pipeline
+
+# a esteira roda em push em qualquer branch e em Pull Requests para a main
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["main"]
+
+
+permissions:
+  contents: read
+
+jobs:
+  # procura senhas e chaves no código e no histórico do Git
+  secrets-trufflehog:
+    name: Segredos com TruffleHog
+    runs-on: ubuntu-24.04
+    steps:
+     
+      
+      - name: Baixar o código
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # baixa o histórico de commits
+
+      # roda o TruffleHog e falha se encontrar algum segredo
+      - name: Varredura de segredos com TruffleHog
+        uses: trufflesecurity/trufflehog@v3.92.1
+        with:
+          base: ''
+          head: HEAD 
+          version: 3.92.1
+          extra_args: --results=verified,unknown   # verified = segredo confirmado como ativo
+
+  # procura vulnerabilidades nas bibliotecas do requirements.txt
+  sca-trivy:
+    name: Dependências com Trivy
+    runs-on: ubuntu-24.04
+    steps:
+      # baixa o código
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      # roda o Trivy nas dependências
+      - name: Analisar dependências com Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs            # analisa os arquivos do projeto
+          scan-ref: .              
+          scanners: vuln           # só vulnerabilidades em bibliotecas (CVEs)
+          severity: HIGH,CRITICAL  # só considera gravidade alta e crítica
+          ignore-unfixed: true     # ignora falhas que ainda não têm versão corrigida
+          format: table            
+          exit-code: "1"           # falha se encontrar algo
+
+  # lê o código do projeto procurando padrões inseguros (SAST)
+  sast-semgrep:
+    name: SAST com Semgrep
+    runs-on: ubuntu-24.04
+    steps:
+      
+      - name: Baixar o código
+        uses: actions/checkout@v5
+
+      # instala o Semgrep
+      - name: Instalar o Semgrep
+        run: pipx install semgrep==1.168.0
+
+      # roda com as regras de Python e Django e falha se achar problema de gravidade ERROR 
+      - name: Análise estática com Semgrep
+        run: semgrep scan --config p/python --config p/django --severity ERROR --error --metrics=off

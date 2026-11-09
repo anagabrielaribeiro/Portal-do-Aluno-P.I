@@ -8,7 +8,7 @@ colorama==0.4.6
 cryptography==50.0.2
 dj-database-url==2.2.0
 Django==6.1
-pillow==12.3.0
+pillow==13.0.0
 psycopg==3.3.6
 psycopg-binary==3.3.6
 psycopg2-binary==2.9.13
