@@ -1,0 +1,18 @@
+# não leva para a imagem: segredos, ambiente virtual, banco local e arquivos do Git
+.env
+.env.*
+venv/
+.venv/
+env/
+db.sqlite3
+*.log
+media/
+staticfiles/
+__pycache__/
+*.py[cod]
+.git/
+.github/
+.vscode/
+.idea/
+docs/
+git-ingest-*.md
