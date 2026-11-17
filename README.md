@@ -3,7 +3,6 @@
 ![Python](https://img.shields.io/badge/Python-3.14-blue.svg)
 ![Django](https://img.shields.io/badge/Django-6.1-green.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-black.svg)
 
 Sistema web de autoatendimento acadêmico e financeiro, desenvolvido como Projeto Integrador de Políticas de Segurança da Informação (UMC).
@@ -65,6 +64,10 @@ O sistema usa a arquitetura **MVT (Model, View, Template)** do Django e é divid
 
 ```text
 Portal-do-Aluno-P.I/
+├── .github/workflows/
+│   ├── devsecops-pipeline.yml  # TruffleHog, Trivy e Semgrep
+│   └── devsecops-avancado.yml  # OWASP ZAP e Bearer
+├── .zap/rules.tsv            # alertas do ZAP aceitos, com justificativa
 ├── config/                   # settings, urls e hasher PBKDF2
 ├── autenticacao/             # login, 2FA, sessões, colaboradores e logs
 ├── recuperacao_senha/        # recuperação de senha
@@ -75,35 +78,16 @@ Portal-do-Aluno-P.I/
 ├── documentos_certificados/
 ├── templates/ static/
 ├── docs/                     # documentação, pôster e resumo
-├── Dockerfile e docker-compose.yml
 └── .env.example
 ```
 
 ## Para rodar o projeto localmente
 
-### Com Docker
-
-Precisa do [Docker Desktop](https://www.docker.com/products/docker-desktop/) aberto.
+Precisa de Python 3.12 ou superior e de um PostgreSQL (local ou no Neon). Não roda com SQLite, porque os triggers dos logs de auditoria são do PostgreSQL. Os comandos para gerar as chaves do `.env` estão no próprio `.env.example`.
 
 ```bash
 git clone https://github.com/anagabrielaribeiro/Portal-do-Aluno-P.I.git
 cd Portal-do-Aluno-P.I
-copy .env.example .env     # Windows (no Linux/Mac: cp)
-```
-
-Preencha o `.env` (os comandos para gerar as chaves estão no próprio `.env.example`) e rode:
-
-```bash
-docker compose up --build
-```
-
-O portal abre em http://localhost:8000. Para outros comandos, use `docker compose exec web` na frente (ex.: `docker compose exec web python manage.py createsuperuser`).
-
-### Sem Docker
-
-Precisa de Python 3.12 ou superior e de um PostgreSQL (local ou no Neon). Não roda com SQLite, porque os triggers dos logs de auditoria são do PostgreSQL.
-
-```bash
 python -m venv venv
 venv\Scripts\activate      # Windows (no Linux/Mac: source venv/bin/activate)
 pip install -r requirements.txt
