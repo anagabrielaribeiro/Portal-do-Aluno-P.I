@@ -1,157 +1,127 @@
-# Portal do Aluno P.I - Gestão Acadêmica e Autoatendimento do Estudante
+# Portal do Aluno P.I
 
-**Integrantes:**
+![Python](https://img.shields.io/badge/Python-3.14-blue.svg)
+![Django](https://img.shields.io/badge/Django-6.1-green.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-black.svg)
+
+Sistema web de autoatendimento acadêmico e financeiro, desenvolvido como Projeto Integrador de Políticas de Segurança da Informação (UMC).
+
+## Integrantes
+
 - Ana Gabriela Gonçalves Ribeiro - RGM: 11221103784 - Eng. Software 7°B
 - Vitória Rodrigues de Souza - RGM: 11232100574 - Eng. Software 7°B
 
-Sistema web para autoatendimento, acompanhamento acadêmico, financeiro, documental e serviços integrados ao estudante.
+Orientador: Prof. Fabiano Bezerra Menegidio
+
+## Acessar o sistema
+
+- Versão online: [portalalunopi.vercel.app](https://portalalunopi.vercel.app/)
+- Kanban: [GitHub Projects](https://github.com/anagabrielaribeiro/Portal-do-Aluno-P.I/projects)
+
+Nenhum login, senha ou chave fica no repositório. As contas são criadas pela área administrativa.
+
+## O que foi implementado
+
+- hash de senha com PBKDF2-SHA256 e salt (1.500.000 iterações);
+- 2FA (TOTP) obrigatório, com QR Code e bloqueio por tentativas inválidas;
+- bloqueio de força bruta no login (15 minutos após 5 erros na conta ou 20 no IP);
+- sessão com cookies seguros e expiração após 30 minutos sem uso;
+- recuperação de senha com token de 1 hora, uso único e limite de pedidos;
+- criptografia em repouso (Fernet) de CPF, RG, telefone, endereço e chave do 2FA;
+- LGPD: consentimento, revogação, exportação dos dados em JSON e anonimização;
+- logs de auditoria imutáveis, protegidos no código e por triggers no PostgreSQL;
+- esteira DevSecOps no GitHub Actions com TruffleHog, Trivy, Semgrep, OWASP ZAP e Bearer.
+
+## Documentação
+
+| Documento | Conteúdo |
+|---|---|
+| [Requisitos](docs/Requisitos%20-%20Projeto%20Integrador%20-%2012.08.2026.docx) | Requisitos funcionais e não funcionais |
+| [Documentação Técnico-Científica](docs/Documenta%C3%A7%C3%A3o%20T%C3%A9cnico-Cient%C3%ADfica%20-%20Portal%20do%20Aluno%20P.I..docx) | Documento principal do projeto |
+| [Login e Autenticação](docs/Documenta%C3%A7%C3%A3o%20T%C3%A9cnica%20-%20Login%20e%20Autentifica%C3%A7%C3%A3o.docx) | Hash, 2FA, sessão e força bruta |
+| [Recuperação de Senha](docs/Documenta%C3%A7%C3%A3o%20T%C3%A9cnica%20-%20Recupera%C3%A7%C3%A3o%20de%20senha.docx) | Token e limite de pedidos |
+| [LGPD](docs/Documenta%C3%A7%C3%A3o%20T%C3%A9cnica%20-%20Lei%20Geral%20de%20Prote%C3%A7%C3%A3o%20de%20Dados%20Pessoais.docx) | Consentimento, exportação e anonimização |
+| [Logs de Segurança](docs/Documenta%C3%A7%C3%A3o%20T%C3%A9cnica%20-%20Logs%20de%20Seguran%C3%A7a.docx) | Auditoria e logs imutáveis |
+| [Relatório DevSecOps](docs/Relat%C3%B3rio%20T%C3%A9cnico%20DevSecOps%20-%20Portal%20do%20ALuno%20PI.docx) e [Relatório DevSecOps 2](docs/Relat%C3%B3rio%20T%C3%A9cnico%20DevSecOps%202%20-%20Portal%20do%20Aluno%20PI.docx) | Esteiras de segurança |
+| [Pôster](docs/Poster%20-%20Portal%20do%20Aluno%20PI.pdf) e [Resumo](docs/Resumo%20-%20Portal%20do%20Aluno%20PI.pdf) | Apresentação no UMC Summit |
 
 ## Stack tecnológica
 
-A aplicação será desenvolvida utilizando **Python** como linguagem principal e **Django** como framework web. O banco de dados utilizado será o **PostgreSQL** para o ambiente de produção e **SQLite** para desenvolvimento e testes iniciais.
-
-As versões foram selecionadas com base em distribuições estáveis e de suporte de longo prazo (LTS), garantindo compatibilidade com os requisitos de segurança, criptografia e conformidade com a LGPD.
-
 | Categoria | Tecnologia | Versão |
-|---|---|---|
-| Linguagem de programação | Python | 3.14.6 |
+| :--- | :--- | :--- |
+| Linguagem | Python | 3.14 |
 | Framework web | Django | 6.1 |
-| Banco de dados (Desenvolvimento) | SQLite | Padrão do Django |
-| Banco de dados (Produção) | PostgreSQL | 18.6 |
+| Banco de dados | PostgreSQL (Neon) | 18 |
+| Segundo fator (TOTP) | `pyotp` + `qrcode` | 2.10 + 8.2 |
+| Criptografia em repouso | `cryptography` (Fernet) | 50.0.2 |
+| Arquivos estáticos | `whitenoise` | 6.7 |
+| Hospedagem | Vercel | - |
 
-### Escolha do Banco de Dados (PostgreSQL)
-O **PostgreSQL** foi escolhido por ser um banco de dados relacional (RDBMS) de altíssimo desempenho, robusto e nativamente suportado pelo Django. Ele atende perfeitamente à necessidade de manter a integridade referencial entre alunos, matrículas, notas, parcelas, boletins e históricos acadêmicos, garantindo consultas isoladas por aluno, suporte nativo a campos JSON (ideal para preferências de acessibilidade e logs de consentimento da LGPD) e alto desempenho em transações.
+## Arquitetura
 
-## Arquitetura da aplicação
-
-O sistema utilizará a arquitetura **MVT — Model, View e Template**, padrão nativo do framework Django. Essa arquitetura organiza a aplicação em responsabilidades separadas, facilitando a manutenção, a evolução, os testes e a auditoria do código.
-
-### Model
-
-Os **Models** representam as entidades de dados, as validações de integridade e as regras relacionadas à persistência das informações acadêmicas e pessoais do aluno. Eles serão responsáveis por mapear tabelas no PostgreSQL para alunos, matrículas, notas, faltas, mensalidades, boletins, calendários, tarefas, certificados, registros de consentimento (LGPD) e logs de auditoria.
-
-### View
-
-As **Views** serão responsáveis por processar as requisições HTTP, aplicar as regras de negócio do portal, validar a autenticação primária e o duplo fator (2FA), aplicar o isolamento estrito de dados por aluno (impedindo o acesso a registros de terceiros) e encaminhar os dados para os Templates ou respostas JSON.
-
-As Views também garantirão que o aluno não possa realizar alterações em dados acadêmicos ou financeiros de responsabilidade exclusiva da instituição.
-
-### Template
-
-Os **Templates** serão responsáveis pela apresentação visual e interativa das informações ao estudante. Neles serão construídas as interfaces web responsivas (compatíveis com celulares, tablets e computadores), menus de navegação, dashboards com resumos de aulas/tarefas, tabelas de notas e formulários acessíveis.
-
-Os Templates exibirão somente as funcionalidades, botões e documentos pertinentes ao perfil do aluno autenticado.
-
-## Módulos e Aplicativos (Apps)
-
-O sistema será dividido em aplicações independentes, chamadas de **apps**, seguindo a organização modular recomendada pelo Django. Cada app agrupamentos funcionais de um determinado domínio do portal.
-
-### Principais Módulos do Portal do Aluno:
-* **Autenticação & Segurança:** Fluxo de login, logout, recuperação de senha via token seguro, autenticação de dois fatores (2FA), controle de sessões e rate limit contra força bruta.
-* **Minhas Matrículas:** Consulta de matrículas ativas, vínculo com cursos, turmas, períodos e histórico de matrículas inativas.
-* **Notas, Faltas e Boletim:** Visualização de notas e frequências por disciplina/componente, acompanhamento do percentual de faltas e geração/impressão do boletim acadêmico.
-* **Financeiro & Boletos:** Consulta de mensalidades (situação: paga, pendente ou vencida), código de pagamento, histórico financeiro e emissão de boletos.
-* **Calendário & Horário de Aulas:** Calendário acadêmico com eventos/feriados por mês e grade de horários detalhada com nome da disciplina, docente responsável, sala, turma e curso.
-* **Agenda & Tarefas:** Criação e acompanhamento de tarefas (pendentes/concluídas) e integração com datas de provas e trabalhos.
-* **Documentos & Certificados:** Acesso e emissão da declaração de matrícula, visualização de documentos pessoais cadastrados (RG), download de arquivos institucionais e inclusão/consulta de certificados.
-* **Privacidade & LGPD:** Painel para consulta de dados pessoais cadastrados, gestão/revogação de consentimento e solicitação de exportação ou exclusão de dados pessoais.
-
-A estrutura de diretórios do projeto segue a organização abaixo:
+O sistema usa a arquitetura **MVT (Model, View, Template)** do Django e é dividido em apps:
 
 ```text
 Portal-do-Aluno-P.I/
-|-- manage.py
-|-- requirements.txt
-|-- README.md
-|-- LICENSE
-|-- .gitignore
-|
-|-- .github/
-|   |-- workflows/
-|       |-- devsecops-avancado.yml   # esteira DevSecOps (ZAP, Bearer e Trivy)
-|
-|-- .zap/
-|   |-- rules.tsv                    # alertas do ZAP aceitos, com justificativa
-|
-|-- config/
-|   |-- settings.py
-|   |-- urls.py
-|   |-- asgi.py
-|   |-- wsgi.py
-|
-|-- docs/                            # documentação técnica do projeto
-|
-|-- alunos/
-|   |-- models.py
-|   |-- views.py
-|   |-- urls.py
-|   |-- forms.py
-|   |-- admin.py
-|
-|-- autenticacao/
-|   |-- models.py
-|   |-- views.py
-|   |-- urls.py
-|   |-- admin.py
-|
-|-- privacidade_lgpd/
-|   |-- models.py
-|   |-- views.py
-|   |-- urls.py
-|   |-- admin.py
-|   |-- mapeamento.py
-|   |-- context_processors.py
-|
-|-- matriculas/
-|   |-- models.py
-|   |-- views.py
-|   |-- urls.py
-|   |-- admin.py
-|
-|-- recuperacao_senha/
-|   |-- models.py
-|   |-- views.py
-|   |-- urls.py
-|   |-- tests.py
-|
-|-- agenda/
-|-- calendario_horarios/
-|-- documentos_certificados/
-|-- financeiro/
-|-- notas/
-|-- tarefas/
-|
-|-- templates/
-|   |-- base.html
-|   |-- alunos/
-|   |   |-- dados_pessoais.html
-|   |-- autenticacao/
-|   |   |-- login.html
-|   |   |-- dashboard.html
-|   |   |-- ativar_2fa.html
-|   |   |-- verificar_2fa.html
-|   |-- matriculas/
-|   |   |-- minhas_matriculas.html
-|   |-- privacidade_lgpd/
-|   |   |-- meus_consentimentos.html
-|   |-- recuperacao_senha/
-|       |-- password_reset_form.html
-|       |-- password_reset_email.html
-|       |-- password_reset_done.html
-|       |-- password_reset_confirm.html
-|       |-- password_reset_complete.html
-|
-|-- static/
-    |-- css/
-    |   |-- style.css
-    |   |-- aluno.css
-    |   |-- matricula.css
-    |   |-- privacidade.css
-    |-- js/
-    |   |-- main.js
-    |-- images/
-        |-- logo.jpeg
+├── .github/workflows/
+│   ├── devsecops-pipeline.yml  # TruffleHog, Trivy e Semgrep
+│   └── devsecops-avancado.yml  # OWASP ZAP e Bearer
+├── .zap/rules.tsv            # alertas do ZAP aceitos, com justificativa
+├── config/                   # settings, urls e hasher PBKDF2
+├── autenticacao/             # login, 2FA, sessões, colaboradores e logs
+├── recuperacao_senha/        # recuperação de senha
+├── alunos/                   # dados pessoais cifrados
+├── privacidade_lgpd/         # consentimentos, exportação e anonimização
+├── matriculas/ notas/ financeiro/
+├── calendario_horarios/ agenda/ tarefas/
+├── documentos_certificados/
+├── templates/ static/
+├── docs/                     # documentação, pôster e resumo
+└── .env.example
 ```
 
+## Para rodar o projeto localmente
 
+Precisa de Python 3.12 ou superior e de um PostgreSQL (local ou no Neon). Não roda com SQLite, porque os triggers dos logs de auditoria são do PostgreSQL. Os comandos para gerar as chaves do `.env` estão no próprio `.env.example`.
 
+```bash
+git clone https://github.com/anagabrielaribeiro/Portal-do-Aluno-P.I.git
+cd Portal-do-Aluno-P.I
+python -m venv venv
+venv\Scripts\activate      # Windows (no Linux/Mac: source venv/bin/activate)
+pip install -r requirements.txt
+copy .env.example .env     # preencha, incluindo a DATABASE_URL
+python manage.py migrate
+python manage.py createcachetable
+python manage.py runserver
+```
+
+### Primeiro acesso
+
+O painel `/gestao-portal/` só aceita colaboradores com 2FA. Crie um superusuário e vincule ele a um colaborador:
+
+```bash
+python manage.py createsuperuser
+python manage.py shell -c "from autenticacao.models import Usuario, Colaborador; Colaborador.objects.create(usuario=Usuario.objects.get(email='SEU_EMAIL'), cargo='Secretaria')"
+```
+
+Depois entre em `/login/colaborador/`, configure o 2FA e cadastre os alunos pelo painel. No primeiro login o aluno também configura o 2FA.
+
+## Testes
+
+```bash
+python manage.py test
+```
+
+## Organização do trabalho
+
+As tarefas foram acompanhadas no Kanban do GitHub Projects e o desenvolvimento foi feito com branches, pull requests e releases. Alguns commits aparecem com nomes diferentes por causa da configuração do Git em computadores diferentes: "Vitor", "vitoria souza", "Vitoria Rodrigues de Souza" e "Vitória Rodrigues" são da Vitória; "Ana Gabriela" e "Ana Gabriela Ribeiro" são da Ana.
+
+## Uso de IA
+
+Usamos ferramentas de IA como apoio para tirar dúvidas, entender conceitos, sugerir trechos de código e revisar textos. As decisões de segurança seguiram a OWASP, a documentação do Django, a RFC 6238 (TOTP) e a LGPD (Lei 13.709/2018). Todo código sugerido foi lido, adaptado e testado, e passa pelos testes automatizados e pela esteira de segurança antes de entrar na `main`.
+
+## Licença
+
+MIT. Veja [LICENSE](LICENSE).
